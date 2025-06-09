@@ -2,101 +2,152 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Login / Signup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to SocialWave</title>
+
+  <!-- Meta for PWA full-screen look -->
+  <meta name="theme-color" content="#4267B2" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.png" />
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
+
     .container {
-      max-width: 400px;
-      margin: 100px auto;
-      padding: 30px;
-      background: #fff;
-      box-shadow: 0 0 10px #ccc;
+      background: white;
+      padding: 20px;
       border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
     }
-    input, button {
+
+    h1 {
+      color: #4267B2;
+    }
+
+    input {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 10px;
+      margin: 6px 0;
       border-radius: 4px;
       border: 1px solid #ccc;
     }
+
     button {
-      background-color: #007bff;
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #4267B2;
       color: white;
       border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
     }
-    button:hover {
-      background-color: #0056b3;
+
+    #quickLogin {
+      margin-top: 20px;
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Welcome to UserSpace</h2>
+    <h1>SocialWave</h1>
+
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
+    <button id="loginBtn">Login</button>
     <button id="signupBtn">Sign Up</button>
-    <button id="loginBtn">Log In</button>
+
+    <div id="quickLogin">
+      <p>Welcome back!</p>
+      <button id="continueBtn">Continue as <span id="userHint"></span></button>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
       getAuth,
+      signInWithEmailAndPassword,
       createUserWithEmailAndPassword,
-      signInWithEmailAndPassword
+      onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc
-    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
       authDomain: "userspace-c42b3.firebaseapp.com",
       projectId: "userspace-c42b3",
-      storageBucket: "userspace-c42b3.firebasestorage.app",
+      storageBucket: "userspace-c42b3.appspot.com",
       messagingSenderId: "201689446744",
       appId: "1:201689446744:web:13e2062781c517189f4d2d"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
-    const signupBtn = document.getElementById("signupBtn");
     const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const quickLogin = document.getElementById("quickLogin");
+    const continueBtn = document.getElementById("continueBtn");
+    const userHint = document.getElementById("userHint");
 
-    signupBtn.addEventListener("click", async () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await setDoc(doc(db, "users", user.uid), {
-          email: user.email
-        });
-        window.location.href = "profile.html";
-      } catch (error) {
-        alert(error.message);
-      }
-    });
-
-    loginBtn.addEventListener("click", async () => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
+    // Login button
+    loginBtn.onclick = async () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "profile.html";
-      } catch (error) {
-        alert(error.message);
+        location.href = "profile.html";
+      } catch (e) {
+        alert("Login failed: " + e.message);
+      }
+    };
+
+    // Signup button
+    signupBtn.onclick = async () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        location.href = "profile.html";
+      } catch (e) {
+        alert("Signup failed: " + e.message);
+      }
+    };
+
+    // On page load, check if already logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Auto-login feature
+        userHint.textContent = user.email;
+        quickLogin.style.display = "block";
+        loginBtn.style.display = "none";
+        signupBtn.style.display = "none";
+        emailInput.style.display = "none";
+        passwordInput.style.display = "none";
+
+        continueBtn.onclick = () => {
+          location.href = "profile.html";
+        };
       }
     });
   </script>
