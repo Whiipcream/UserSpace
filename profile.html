@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      transition: background-color 0.3s;
+    }
+    .profile-box {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    h1 {
+      text-align: center;
+    }
+    .bio {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f4f4f4;
+      border-radius: 5px;
+    }
+    #signOutBtn {
+      margin-top: 20px;
+      background: red;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-box" id="profileBox">
+    <h1 id="username">Loading...</h1>
+    <p><strong>Email:</strong> <span id="email"></span></p>
+    <div class="bio" id="bio"></div>
+    <button id="signOutBtn">Sign Out</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
+      authDomain: "userspace-c42b3.firebaseapp.com",
+      projectId: "userspace-c42b3",
+      storageBucket: "userspace-c42b3.firebasestorage.app",
+      messagingSenderId: "201689446744",
+      appId: "1:201689446744:web:13e2062781c517189f4d2d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const usernameEl = document.getElementById("username");
+    const emailEl = document.getElementById("email");
+    const bioEl = document.getElementById("bio");
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "index.html"; // redirect if not signed in
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        usernameEl.textContent = data.username || "No Username";
+        emailEl.textContent = data.email;
+        bioEl.textContent = data.bio || "No bio yet.";
+        document.body.style.backgroundColor = data.themeColor || "#ffffff";
+      } else {
+        usernameEl.textContent = "Profile not found";
+        emailEl.textContent = "";
+        bioEl.textContent = "";
+      }
+    });
+
+    document.getElementById("signOutBtn").addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
