@@ -3,254 +3,541 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Profile - SocialWave</title>
+<title>SocialWave Profile</title>
 <style>
-  body {
+  /* Basic reset */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
     font-family: Arial, sans-serif;
-    margin: 0; padding: 0;
-    background: #f9f9f9;
+    background-color: var(--bg-color, #f0f2f5);
+    color: var(--font-color, #050505);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
-  #profileContainer {
+
+  /* Container */
+  #app {
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  }
+
+  header {
+    padding: 16px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Profile top section */
+  #profile-top {
     padding: 20px;
-    margin-bottom: 60px; /* space for nav */
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid #ddd;
   }
-  #profilePic {
-    width: 100px; height: 100px;
+
+  #profile-pic-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #ccc;
+    overflow: hidden;
+    background: #ccc;
+    cursor: pointer;
+    border: 3px solid #1877f2;
+    flex-shrink: 0;
   }
-  #uploadPicInput {
-    margin-top: 10px;
-  }
-  #postInput {
+  #profile-pic {
     width: 100%;
-    margin-top: 20px;
-    resize: vertical;
+    height: 100%;
+    object-fit: cover;
   }
-  #postBtn {
-    margin-top: 10px;
-    padding: 8px 16px;
+  #upload-profile-pic-input {
+    display: none;
+  }
+  #edit-pic-label {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    text-align: center;
+    font-size: 0.85rem;
+    padding: 4px 0;
     cursor: pointer;
   }
-  #postsList {
-    margin-top: 30px;
+
+  #profile-info {
+    flex: 1;
   }
-  .postItem {
-    background: white;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  #profile-username {
+    font-size: 1.4rem;
+    font-weight: 700;
   }
-  #navBar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: #222;
+  #profile-bio {
+    margin-top: 8px;
+    color: #666;
+    font-style: italic;
+  }
+
+  /* Posts section */
+  #posts-section {
+    flex: 1;
+    padding: 16px 20px;
+    overflow-y: auto;
+  }
+  #new-post-container {
     display: flex;
-    justify-content: space-around;
-    padding: 12px 0;
-    color: white;
+    gap: 10px;
+    margin-bottom: 20px;
   }
-  #navBar button {
-    background: none;
+  #new-post-text {
+    flex: 1;
+    padding: 8px;
+    font-size: 1rem;
+  }
+  #post-btn {
+    background: #1877f2;
     border: none;
     color: white;
-    font-size: 18px;
+    padding: 10px 16px;
+    font-weight: bold;
     cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
   }
-  #navBar button:hover {
-    text-decoration: underline;
+  #post-btn:hover {
+    background: #145dbf;
   }
-  #settingsPanel {
-    position: fixed;
-    bottom: 60px; /* above nav */
-    left: 0; right: 0;
-    max-height: 300px;
+
+  .post {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    position: relative;
+    background: #fafafa;
+  }
+  .post-text {
+    white-space: pre-wrap;
+  }
+  .post-delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    cursor: pointer;
+    color: #999;
+    font-size: 1.2rem;
+    border: none;
+    background: transparent;
+  }
+  .post-delete-btn:hover {
+    color: #f44336;
+  }
+
+  /* Bottom nav */
+  nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 60px;
     background: white;
-    box-shadow: 0 -2px 6px rgba(0,0,0,0.25);
+    border-top: 1px solid #ddd;
+    position: sticky;
+    bottom: 0;
+  }
+  nav button {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #1877f2;
+    padding: 8px 16px;
+  }
+  nav button.active {
+    border-bottom: 3px solid #1877f2;
+    font-weight: 700;
+  }
+
+  /* Settings panel sliding up */
+  #settings-panel {
+    position: fixed;
+    bottom: -350px;
+    left: 0;
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
     padding: 20px;
-    overflow-y: auto;
-    display: none;
+    transition: bottom 0.4s ease;
     z-index: 100;
   }
-  #settingsPanel.active {
-    display: block;
+  #settings-panel.open {
+    bottom: 0;
   }
+  #settings-close-btn {
+    display: block;
+    margin-left: auto;
+    cursor: pointer;
+    font-size: 1.4rem;
+    border: none;
+    background: none;
+    color: #666;
+  }
+
+  /* Settings form */
+  #settings-form label {
+    display: block;
+    margin-top: 16px;
+    font-weight: 600;
+  }
+  #settings-form input[type="color"],
+  #settings-form select,
+  #settings-form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    font-size: 1rem;
+  }
+
 </style>
 </head>
 <body>
+<div id="app">
 
-<div id="profileContainer">
-  <h2>Your Profile</h2>
-  <img id="profilePic" src="https://via.placeholder.com/100" alt="Profile Picture" />
-  <br />
-  <input type="file" id="uploadPicInput" accept="image/*" />
-  <button id="uploadPicBtn">Upload Profile Picture</button>
+  <header>
+    <div>SocialWave Profile</div>
+    <button id="logout-btn" title="Log out">Logout</button>
+  </header>
 
-  <h3>Create Post</h3>
-  <textarea id="postInput" rows="3" placeholder="What's on your mind?"></textarea>
-  <br />
-  <button id="postBtn">Post</button>
+  <!-- Profile Top -->
+  <section id="profile-top">
+    <div id="profile-pic-container" title="Change Profile Picture">
+      <img id="profile-pic" src="https://via.placeholder.com/120?text=Profile" alt="Profile Picture" />
+      <label id="edit-pic-label" for="upload-profile-pic-input">Edit</label>
+      <input type="file" id="upload-profile-pic-input" accept="image/*" />
+    </div>
+    <div id="profile-info">
+      <div id="profile-username">Loading...</div>
+      <div id="profile-bio">Add a bio in settings.</div>
+    </div>
+  </section>
 
-  <div id="postsList"></div>
+  <!-- Posts Section -->
+  <section id="posts-section">
+    <div id="new-post-container">
+      <textarea id="new-post-text" placeholder="What's on your mind?" rows="2"></textarea>
+      <button id="post-btn">Post</button>
+    </div>
+    <div id="posts-list">
+      <!-- Posts appended here -->
+    </div>
+  </section>
+
+  <!-- Bottom Nav -->
+  <nav>
+    <button id="nav-home">Home</button>
+    <button id="nav-profile" class="active">Profile</button>
+    <button id="nav-settings">Settings</button>
+  </nav>
+
+  <!-- Settings Panel -->
+  <div id="settings-panel">
+    <button id="settings-close-btn" title="Close Settings">&times;</button>
+    <form id="settings-form">
+      <label for="bio-input">Bio</label>
+      <textarea id="bio-input" rows="3" placeholder="Write something about yourself..."></textarea>
+
+      <label for="bgcolor-input">Profile Background Color</label>
+      <input type="color" id="bgcolor-input" value="#ffffff" />
+
+      <label for="font-select">Font Style</label>
+      <select id="font-select">
+        <option value="Arial, sans-serif">Arial</option>
+        <option value="'Courier New', monospace">Courier New</option>
+        <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+        <option value="'Georgia', serif">Georgia</option>
+        <option value="'Times New Roman', serif">Times New Roman</option>
+        <option value="'Verdana', sans-serif">Verdana</option>
+      </select>
+
+      <button type="submit" style="margin-top:20px; padding: 10px 20px; font-weight: 600; background:#1877f2; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+        Save Settings
+      </button>
+    </form>
+  </div>
+
 </div>
 
-<div id="settingsPanel">
-  <h3>Settings</h3>
-  <button id="logoutBtn">Logout</button>
-  <!-- Add more settings controls here -->
-</div>
-
-<div id="navBar">
-  <button id="btnProfile">Profile</button>
-  <button id="btnHome">Home</button>
-  <button id="btnSettings">Settings</button>
-</div>
-
+<!-- Firebase SDKs -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, doc, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
 
+  // Your Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
     authDomain: "userspace-c42b3.firebaseapp.com",
     projectId: "userspace-c42b3",
-    storageBucket: "userspace-c42b3.appspot.com",
+    storageBucket: "userspace-c42b3.firebasestorage.app",
     messagingSenderId: "201689446744",
     appId: "1:201689446744:web:13e2062781c517189f4d2d"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-  const profilePic = document.getElementById('profilePic');
-  const uploadPicInput = document.getElementById('uploadPicInput');
-  const uploadPicBtn = document.getElementById('uploadPicBtn');
-  const postInput = document.getElementById('postInput');
-  const postBtn = document.getElementById('postBtn');
-  const postsList = document.getElementById('postsList');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const settingsPanel = document.getElementById('settingsPanel');
+  // DOM elements
+  const profileUsername = document.getElementById("profile-username");
+  const profileBio = document.getElementById("profile-bio");
+  const profilePic = document.getElementById("profile-pic");
+  const uploadPicInput = document.getElementById("upload-profile-pic-input");
+  const postBtn = document.getElementById("post-btn");
+  const newPostText = document.getElementById("new-post-text");
+  const postsList = document.getElementById("posts-list");
+  const logoutBtn = document.getElementById("logout-btn");
 
-  const btnProfile = document.getElementById('btnProfile');
-  const btnHome = document.getElementById('btnHome');
-  const btnSettings = document.getElementById('btnSettings');
-  const profileContainer = document.getElementById('profileContainer');
+  const navHomeBtn = document.getElementById("nav-home");
+  const navProfileBtn = document.getElementById("nav-profile");
+  const navSettingsBtn = document.getElementById("nav-settings");
 
-  // Toggle settings panel
-  btnSettings.onclick = () => {
-    if (settingsPanel.classList.contains('active')) {
-      settingsPanel.classList.remove('active');
+  const settingsPanel = document.getElementById("settings-panel");
+  const settingsCloseBtn = document.getElementById("settings-close-btn");
+  const settingsForm = document.getElementById("settings-form");
+  const bioInput = document.getElementById("bio-input");
+  const bgColorInput = document.getElementById("bgcolor-input");
+  const fontSelect = document.getElementById("font-select");
+
+  let currentUser = null;
+
+  // Show/hide sections (right now Home is placeholder, so just Profile & Settings)
+  function setActiveNav(button) {
+    [navHomeBtn, navProfileBtn, navSettingsBtn].forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+  }
+
+  // Log out handler
+  logoutBtn.onclick = () => {
+    signOut(auth).then(() => {
+      window.location.href = "index.html"; // Redirect to login/home page
+    });
+  };
+
+  // Open/Close Settings panel
+  navSettingsBtn.onclick = () => {
+    settingsPanel.classList.add("open");
+    setActiveNav(navSettingsBtn);
+  };
+  settingsCloseBtn.onclick = () => {
+    settingsPanel.classList.remove("open");
+    setActiveNav(navProfileBtn);
+  };
+
+  // For demo, navHomeBtn just alerts (replace with actual home page later)
+  navHomeBtn.onclick = () => {
+    alert("Home page coming soon!");
+  };
+
+  navProfileBtn.onclick = () => {
+    setActiveNav(navProfileBtn);
+    settingsPanel.classList.remove("open");
+  };
+
+  // Load user profile info & posts
+  async function loadUserData(uid) {
+    // Load profile info from Firestore doc "users/{uid}"
+    const userDocRef = doc(db, "users", uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (userDocSnap.exists()) {
+      const data = userDocSnap.data();
+      profileUsername.textContent = data.username || "User";
+      profileBio.textContent = data.bio || "Add a bio in settings.";
+      bioInput.value = data.bio || "";
+      bgColorInput.value = data.bgColor || "#ffffff";
+      fontSelect.value = data.fontFamily || "Arial, sans-serif";
+
+      // Apply bg color and font style to body CSS variables
+      document.body.style.setProperty("--bg-color", bgColorInput.value);
+      document.body.style.setProperty("--font-color", getContrastYIQ(bgColorInput.value));
+      document.body.style.fontFamily = fontSelect.value;
+
+      // Load profile pic if exists
+      if (data.profilePicURL) {
+        profilePic.src = data.profilePicURL;
+      } else {
+        profilePic.src = "https://via.placeholder.com/120?text=Profile";
+      }
     } else {
-      settingsPanel.classList.add('active');
+      // New user doc setup
+      await updateDoc(userDocRef, {
+        username: auth.currentUser.displayName || "User",
+        bio: "",
+        bgColor: "#ffffff",
+        fontFamily: "Arial, sans-serif",
+        profilePicURL: null
+      }).catch(() => {});
+      profileUsername.textContent = auth.currentUser.displayName || "User";
+      profileBio.textContent = "Add a bio in settings.";
+      bioInput.value = "";
+      bgColorInput.value = "#ffffff";
+      fontSelect.value = "Arial, sans-serif";
     }
-  };
 
-  // Simple nav (only Profile and Home placeholders for now)
-  btnProfile.onclick = () => {
-    settingsPanel.classList.remove('active');
-    profileContainer.style.display = 'block';
-    // You can add your home page logic here, for now hide it
-    // homePage.style.display = 'none'; // If you add a home page container
-  };
-  btnHome.onclick = () => {
-    alert('Home feed coming soon!');
-  };
+    // Load posts for user
+    loadUserPosts(uid);
+  }
 
-  // Logout
-  logoutBtn.onclick = async () => {
-    await signOut(auth);
-    alert('Logged out');
-    location.reload();
-  };
+  // Load posts for user, realtime listener
+  function loadUserPosts(uid) {
+    postsList.innerHTML = "";
+    const postsRef = collection(db, "posts");
+    const q = query(postsRef, where("uid", "==", uid), orderBy("createdAt", "desc"));
 
-  // Upload profile picture handler
-  uploadPicBtn.onclick = async () => {
-    const file = uploadPicInput.files[0];
-    if (!file) {
-      alert('Please select an image file first.');
-      return;
-    }
-    const user = auth.currentUser;
-    if (!user) {
-      alert('User not logged in');
-      return;
-    }
-    try {
-      const storageRef = ref(storage, `profile_pictures/${user.uid}/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const photoURL = await getDownloadURL(storageRef);
-      await updateProfile(user, { photoURL });
-      profilePic.src = photoURL;
-      alert('Profile picture updated!');
-    } catch (err) {
-      console.error('Upload error:', err);
-      alert('Failed to upload profile picture');
-    }
-  };
+    onSnapshot(q, (querySnapshot) => {
+      postsList.innerHTML = "";
+      if (querySnapshot.empty) {
+        postsList.innerHTML = "<p>No posts yet.</p>";
+        return;
+      }
+      querySnapshot.forEach(docSnap => {
+        const post = docSnap.data();
+        const postId = docSnap.id;
 
-  // Post button handler
-  postBtn.onclick = async () => {
-    const content = postInput.value.trim();
-    if (!content) {
-      alert('Post content cannot be empty');
-      return;
-    }
-    const user = auth.currentUser;
-    if (!user) {
-      alert('User not logged in');
-      return;
-    }
-    try {
-      await addDoc(collection(db, 'posts'), {
-        uid: user.uid,
-        content,
-        createdAt: serverTimestamp(),
-        displayName: user.displayName || 'Anonymous',
-        photoURL: user.photoURL || ''
+        const postDiv = document.createElement("div");
+        postDiv.classList.add("post");
+
+        const postText = document.createElement("div");
+        postText.classList.add("post-text");
+        postText.textContent = post.text;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.classList.add("post-delete-btn");
+        deleteBtn.innerHTML = "🗑";
+        deleteBtn.title = "Delete post";
+
+        deleteBtn.onclick = async () => {
+          if (confirm("Delete this post?")) {
+            await deleteDoc(doc(db, "posts", postId));
+          }
+        };
+
+        postDiv.appendChild(postText);
+        postDiv.appendChild(deleteBtn);
+        postsList.appendChild(postDiv);
       });
-      postInput.value = '';
-      loadPosts();
-    } catch (err) {
-      console.error('Error posting:', err);
-      alert('Failed to create post');
-    }
-  };
-
-  // Load user posts
-  async function loadPosts() {
-    const user = auth.currentUser;
-    if (!user) return;
-    const postsQuery = query(collection(db, 'posts'),
-      where('uid', '==', user.uid),
-      orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(postsQuery);
-    postsList.innerHTML = '';
-    snapshot.forEach(doc => {
-      const post = doc.data();
-      const postDiv = document.createElement('div');
-      postDiv.classList.add('postItem');
-      postDiv.textContent = post.content;
-      postsList.appendChild(postDiv);
     });
   }
 
-  // Monitor auth state & initialize profile info
-  onAuthStateChanged(auth, user => {
+  // Add new post to Firestore
+  postBtn.onclick = async () => {
+    const text = newPostText.value.trim();
+    if (!text) {
+      alert("Post cannot be empty.");
+      return;
+    }
+    postBtn.disabled = true;
+
+    try {
+      await addDoc(collection(db, "posts"), {
+        uid: currentUser.uid,
+        text,
+        createdAt: new Date()
+      });
+      newPostText.value = "";
+    } catch (e) {
+      alert("Error posting: " + e.message);
+    }
+
+    postBtn.disabled = false;
+  };
+
+  // Profile picture upload
+  uploadPicInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const storagePath = `profile_pics/${currentUser.uid}`;
+    const picRef = storageRef(storage, storagePath);
+
+    try {
+      // Upload file
+      await uploadBytes(picRef, file);
+      // Get URL and update Firestore
+      const url = await getDownloadURL(picRef);
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        profilePicURL: url
+      });
+      profilePic.src = url;
+      alert("Profile picture updated!");
+    } catch (err) {
+      alert("Error uploading picture: " + err.message);
+    }
+  };
+
+  // Settings form submit to save bio, bg color, font
+  settingsForm.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        bio: bioInput.value.trim(),
+        bgColor: bgColorInput.value,
+        fontFamily: fontSelect.value
+      });
+      // Apply changes live
+      profileBio.textContent = bioInput.value.trim() || "Add a bio in settings.";
+      document.body.style.setProperty("--bg-color", bgColorInput.value);
+      document.body.style.setProperty("--font-color", getContrastYIQ(bgColorInput.value));
+      document.body.style.fontFamily = fontSelect.value;
+      alert("Settings saved!");
+      settingsPanel.classList.remove("open");
+      setActiveNav(navProfileBtn);
+    } catch (err) {
+      alert("Error saving settings: " + err.message);
+    }
+  };
+
+  // Logout button has been defined earlier
+
+  // Contrast helper to pick font color based on background color brightness
+  function getContrastYIQ(hexcolor){
+    hexcolor = hexcolor.replace("#", "");
+    const r = parseInt(hexcolor.substr(0,2),16);
+    const g = parseInt(hexcolor.substr(2,2),16);
+    const b = parseInt(hexcolor.substr(4,2),16);
+    const yiq = ((r*299)+(g*587)+(b*114))/1000;
+    return (yiq >= 128) ? '#050505' : '#fafafa';
+  }
+
+  // Listen auth state and load profile
+  onAuthStateChanged(auth, (user) => {
     if (user) {
-      profilePic.src = user.photoURL || 'https://via.placeholder.com/100';
-      loadPosts();
+      currentUser = user;
+      loadUserData(user.uid);
     } else {
-      alert('Not logged in. Please sign in first.');
-      // Redirect or show login page here if you want
+      // Not logged in, redirect to login page or home
+      window.location.href = "index.html";
     }
   });
 </script>
-
 </body>
 </html>
