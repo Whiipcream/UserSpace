@@ -2,244 +2,593 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SocialWave Profile</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" />
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      background-color: #f0f2f5;
+      margin: 0; font-family: Arial, sans-serif; background: #f0f2f5; color: #1c1e21;
+      display: flex; flex-direction: column; min-height: 100vh;
     }
     header {
-      background-color: #4267B2;
-      color: white;
-      padding: 10px;
+      background: #1877f2; color: white; padding: 1rem; font-size: 1.5rem; font-weight: bold;
       text-align: center;
     }
-    .cover-photo {
-      width: 100%;
-      height: 150px;
-      background: url('https://via.placeholder.com/800x150') center/cover no-repeat;
-      position: relative;
-    }
-    .profile-picture {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 4px solid white;
-      position: absolute;
-      bottom: -50px;
-      left: 20px;
+    main {
+      flex: 1;
+      max-width: 600px;
+      margin: 1rem auto;
       background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
     }
-    .profile-info {
-      margin-top: 60px;
-      padding: 10px 20px;
+    #profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
-    .profile-info h2 {
-      margin: 0;
+    #profile-pic {
+      width: 100px; height: 100px; border-radius: 50%; object-fit: cover; cursor: pointer;
+      border: 3px solid #1877f2;
     }
-    .post-area {
-      padding: 20px;
+    #profile-info {
+      flex: 1;
     }
-    textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      resize: none;
+    #profile-name {
+      font-size: 1.8rem; font-weight: 700; margin: 0 0 0.3rem 0;
     }
-    .post-btn {
-      margin-top: 10px;
-      padding: 10px;
-      width: 100%;
-      background: #4267B2;
-      color: white;
-      border: none;
-      border-radius: 5px;
+    #profile-bio {
+      font-size: 1rem; color: #606770;
+      white-space: pre-wrap;
     }
-    .post-feed {
-      margin-top: 20px;
-      padding: 0 20px;
+    #new-post-form {
+      display: flex; gap: 0.5rem; margin-bottom: 1rem;
     }
-    .post {
-      background: white;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 5px;
+    #new-post-input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 20px;
+      border: 1px solid #ccd0d5;
+      outline: none;
+    }
+    #post-btn {
+      background: #1877f2; color: white; border: none; border-radius: 20px; padding: 0 1rem;
+      font-weight: 600; cursor: pointer;
+    }
+    #post-btn:disabled {
+      background: #a3bffa; cursor: default;
+    }
+    #posts-list .post {
+      border: 1px solid #dddfe2; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;
+      background: #fff;
     }
     .post-header {
-      font-weight: bold;
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
     }
-    .post-content {
-      margin-top: 5px;
+    .post-profile-pic {
+      width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
     }
-    .post-actions {
-      margin-top: 10px;
-      display: flex;
-      justify-content: flex-end;
+    .post-user-name {
+      font-weight: 700;
+      font-size: 1rem;
     }
-    .post-actions button {
-      background: none;
+    .post-date {
+      font-size: 0.8rem;
+      color: #90949c;
+      margin-left: auto;
+    }
+    .post-text {
+      font-size: 1rem;
+      white-space: pre-wrap;
+      margin-bottom: 0.5rem;
+    }
+    .post-delete-btn {
+      background: #e53e3e;
+      color: white;
       border: none;
-      color: red;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
       cursor: pointer;
+      float: right;
     }
-    .nav-bar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
+    nav#bottom-nav {
       display: flex;
       justify-content: space-around;
-      background: #fff;
-      border-top: 1px solid #ccc;
-      padding: 10px 0;
+      background: white;
+      border-top: 1px solid #dddfe2;
+      padding: 0.5rem 0;
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
     }
-    .nav-bar button {
+    nav#bottom-nav button {
       background: none;
       border: none;
-      font-size: 16px;
+      cursor: pointer;
+      color: #606770;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
     }
-    #settingsPanel {
+    nav#bottom-nav button svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    nav#bottom-nav button.active {
+      color: #1877f2;
+    }
+
+    /* Settings Panel */
+    #settings-panel {
       position: fixed;
-      bottom: 60px;
-      left: 0;
-      right: 0;
+      bottom: -100%;
+      left: 0; right: 0;
       background: white;
-      padding: 20px;
-      display: none;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 -2px 10px rgb(0 0 0 / 0.2);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      transition: bottom 0.3s ease;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding: 1rem 1.5rem 3rem 1.5rem;
+      z-index: 100;
+    }
+    #settings-panel.open {
+      bottom: 0;
+    }
+    #settings-panel h2 {
+      margin-top: 0;
+    }
+    #settings-panel label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    #settings-panel input[type="text"],
+    #settings-panel textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccd0d5;
+      resize: vertical;
+    }
+    #settings-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #606770;
+    }
+    #profile-pic-upload {
+      margin-bottom: 1rem;
+    }
+    #save-settings-btn {
+      background: #1877f2;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    #logout-btn {
+      background: #e53e3e;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
     }
   </style>
 </head>
 <body>
+  <header>SocialWave Profile</header>
+  <main>
+    <section id="profile-header">
+      <img id="profile-pic" src="https://via.placeholder.com/100?text=Profile" alt="Profile Picture" title="Click to change profile picture" />
+      <div id="profile-info">
+        <h1 id="profile-name">Loading...</h1>
+        <p id="profile-bio">Loading bio...</p>
+      </div>
+    </section>
 
-<header>SocialWave</header>
+    <form id="new-post-form" autocomplete="off">
+      <input id="new-post-input" type="text" placeholder="What's on your mind?" maxlength="280" required />
+      <button id="post-btn" type="submit" disabled>Post</button>
+    </form>
 
-<div class="cover-photo">
-  <img class="profile-picture" id="profilePicture" src="https://via.placeholder.com/100" />
-</div>
+    <section id="posts-list">
+      <!-- Posts will appear here -->
+      <p style="color:#606770; text-align:center;">Loading posts...</p>
+    </section>
+  </main>
 
-<div class="profile-info">
-  <h2 id="userName">Your Name</h2>
-  <p id="userBio">Your bio will show here...</p>
-</div>
+  <nav id="bottom-nav" aria-label="Bottom navigation">
+    <button id="nav-profile" class="active" title="Profile" aria-current="page" aria-label="Profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      Profile
+    </button>
+    <button id="nav-home" title="Home" aria-label="Home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </button>
+    <button id="nav-settings" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.43 12.98l.04-.32-.04-.32 2.12-1.63-1.5-2.6-2.62 1.5-.33-.03-.32.03-1.58-2.61-2.6 1.5.04.32-.04.32-2.12 1.63 1.5 2.6 2.62-1.5.33.03.32-.03 1.58 2.61 2.6-1.5zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 8.5 12 8.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+      Settings
+    </button>
+  </nav>
 
-<div class="post-area">
-  <textarea id="newPost" rows="3" placeholder="What's on your mind?"></textarea>
-  <button class="post-btn" onclick="createPost()">Post</button>
-</div>
+  <!-- Settings Panel -->
+  <section id="settings-panel" aria-modal="true" role="dialog" aria-labelledby="settings-title" tabindex="-1">
+    <button id="settings-close" aria-label="Close settings">&times;</button>
+    <h2 id="settings-title">Settings</h2>
+    <label for="edit-name">Display Name</label>
+    <input id="edit-name" type="text" maxlength="50" />
 
-<div class="post-feed" id="postFeed"></div>
+    <label for="edit-bio">Bio</label>
+    <textarea id="edit-bio" rows="3" maxlength="280"></textarea>
 
-<div id="settingsPanel">
-  <h3>Settings</h3>
-  <button onclick="logout()">Log Out</button>
-</div>
+    <label for="profile-pic-upload">Change Profile Picture</label>
+    <input id="profile-pic-upload" type="file" accept="image/*" />
 
-<div class="nav-bar">
-  <button onclick="goToProfile()">👤 Profile</button>
-  <button onclick="goToHome()">🏠 Home</button>
-  <button onclick="toggleSettings()">⚙️ Settings</button>
-</div>
+    <button id="save-settings-btn">Save Settings</button>
+    <button id="logout-btn">Log Out</button>
+  </section>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, signOut
-  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-  import {
-    getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc
-  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
-    authDomain: "userspace-c42b3.firebaseapp.com",
-    projectId: "userspace-c42b3",
-    storageBucket: "userspace-c42b3.appspot.com",
-    messagingSenderId: "201689446744",
-    appId: "1:201689446744:web:13e2062781c517189f4d2d"
-  };
+  <script>
+    // Paste your Firebase config here (replace with your actual config)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY_HERE",
+      authDomain: "YOUR_AUTH_DOMAIN_HERE",
+      projectId: "YOUR_PROJECT_ID_HERE",
+      storageBucket: "YOUR_STORAGE_BUCKET_HERE",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
+      appId: "YOUR_APP_ID_HERE"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-  const postFeed = document.getElementById('postFeed');
-  const userNameEl = document.getElementById('userName');
-  const settingsPanel = document.getElementById('settingsPanel');
+    // Elements
+    const profilePicImg = document.getElementById('profile-pic');
+    const profilePicInput = document.getElementById('profile-pic-input'); // unused, removed in HTML to avoid confusion
+    const profileNameElem = document.getElementById('profile-name');
+    const profileBioElem = document.getElementById('profile-bio');
 
-  let currentUser = null;
+    const newPostForm = document.getElementById('new-post-form');
+    const newPostInput = document.getElementById('new-post-input');
+    const postBtn = document.getElementById('post-btn');
+    const postsList = document.getElementById('posts-list');
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUser = user;
-      userNameEl.textContent = user.displayName || "User";
-      loadPosts();
-    } else {
-      window.location.href = "index.html";
-    }
-  });
+    const settingsBtn = document.getElementById('nav-settings');
+    const settingsPanel = document.getElementById('settings-panel');
+    const settingsCloseBtn = document.getElementById('settings-close');
 
-  async function createPost() {
-    const postText = document.getElementById("newPost").value.trim();
-    if (postText === "") return;
+    const editNameInput = document.getElementById('edit-name');
+    const editBioInput = document.getElementById('edit-bio');
+    const profilePicUpload = document.getElementById('profile-pic-upload');
+    const saveSettingsBtn = document.getElementById('save-settings-btn');
+    const logoutBtn = document.getElementById('logout-btn');
 
-    await addDoc(collection(db, "posts"), {
-      uid: currentUser.uid,
-      name: currentUser.displayName || "User",
-      text: postText,
-      createdAt: new Date()
-    });
+    const navProfileBtn = document.getElementById('nav-profile');
+    const navHomeBtn = document.getElementById('nav-home');
+    const navSettingsBtn = document.getElementById('nav-settings');
 
-    document.getElementById("newPost").value = "";
-  }
+    let currentUser = null;
+    let postsUnsubscribe = null;
+    let profilePicFile = null;
 
-  function loadPosts() {
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snapshot) => {
-      postFeed.innerHTML = "";
-      snapshot.forEach((docSnap) => {
-        const post = docSnap.data();
-        if (post.uid === currentUser.uid) {
-          const postDiv = document.createElement("div");
-          postDiv.className = "post";
-          postDiv.innerHTML = `
-            <div class="post-header">${post.name}</div>
-            <div class="post-content">${post.text}</div>
-            <div class="post-actions">
-              <button onclick="deletePost('${docSnap.id}')">🗑️ Delete</button>
-            </div>
-          `;
-          postFeed.appendChild(postDiv);
-        }
+    // Helper: show active nav button
+    function setActiveNav(button) {
+      [navProfileBtn, navHomeBtn, navSettingsBtn].forEach(btn => {
+        btn.classList.remove('active');
       });
-    });
-  }
-
-  async function deletePost(postId) {
-    if (confirm("Delete this post?")) {
-      await deleteDoc(doc(db, "posts", postId));
+      button.classList.add('active');
     }
-  }
 
-  function toggleSettings() {
-    settingsPanel.style.display = settingsPanel.style.display === "block" ? "none" : "block";
-  }
+    // Navigation button handlers
+    navProfileBtn.addEventListener('click', () => {
+      setActiveNav(navProfileBtn);
+      // Just stay on profile (this page)
+    });
+    navHomeBtn.addEventListener('click', () => {
+      setActiveNav(navHomeBtn);
+      // TODO: Replace with actual home navigation
+      alert('Home page is not implemented yet.');
+    });
+    navSettingsBtn.addEventListener('click', () => {
+      setActiveNav(navSettingsBtn);
+      openSettingsPanel();
+    });
 
-  function logout() {
-    signOut(auth);
-  }
+    // Open/close settings panel
+    function openSettingsPanel() {
+      settingsPanel.classList.add('open');
+      settingsPanel.focus();
+    }
+    function closeSettingsPanel() {
+      settingsPanel.classList.remove('open');
+      profilePicFile = null; // clear any chosen pic
+      profilePicUpload.value = "";
+    }
+    settingsCloseBtn.addEventListener('click', closeSettingsPanel);
 
-  function goToHome() {
-    alert("Home page coming soon.");
-  }
+    // Also close settings if user clicks outside panel (optional)
+    window.addEventListener('click', (e) => {
+      if (!settingsPanel.contains(e.target) && !navSettingsBtn.contains(e.target)) {
+        closeSettingsPanel();
+      }
+    });
 
-  function goToProfile() {
-    window.scrollTo(0, 0);
-  }
-</script>
+    // Auth state observer
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        loadUserProfile();
+        subscribeToPosts();
+        postBtn.disabled = false;
+      } else {
+        // Redirect to login page if not logged in
+        window.location.href = "login.html"; // Change this to your login page path
+      }
+    });
 
+    // Load user profile info
+    async function loadUserProfile() {
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists) {
+          const data = userDoc.data();
+          profileNameElem.textContent = data.displayName || "Unnamed User";
+          profileBioElem.textContent = data.bio || "This is your bio. Edit it in settings.";
+          editNameInput.value = data.displayName || "";
+          editBioInput.value = data.bio || "";
+          if (data.photoURL) {
+            profilePicImg.src = data.photoURL;
+          } else {
+            profilePicImg.src = 'https://via.placeholder.com/100?text=Profile';
+          }
+        } else {
+          // New user doc
+          profileNameElem.textContent = currentUser.displayName || "Unnamed User";
+          profileBioElem.textContent = "This is your bio. Edit it in settings.";
+          editNameInput.value = currentUser.displayName || "";
+          editBioInput.value = "";
+          if (currentUser.photoURL) {
+            profilePicImg.src = currentUser.photoURL;
+          } else {
+            profilePicImg.src = 'https://via.placeholder.com/100?text=Profile';
+          }
+          await db.collection('users').doc(currentUser.uid).set({
+            displayName: currentUser.displayName || "",
+            bio: "",
+            photoURL: currentUser.photoURL || ""
+          });
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      }
+    }
+
+    // Subscribe to posts in real-time
+    function subscribeToPosts() {
+      if (postsUnsubscribe) postsUnsubscribe();
+      postsUnsubscribe = db.collection('posts')
+        .orderBy('createdAt', 'desc')
+        .limit(50)
+        .onSnapshot(snapshot => {
+          postsList.innerHTML = "";
+          if (snapshot.empty) {
+            postsList.innerHTML = '<p style="color:#606770; text-align:center;">No posts yet. Be the first!</p>';
+            return;
+          }
+          snapshot.forEach(doc => {
+            const post = doc.data();
+            const postElem = createPostElement(doc.id, post);
+            postsList.appendChild(postElem);
+          });
+        });
+    }
+
+    // Create DOM element for a post
+    function createPostElement(postId, post) {
+      const postDiv = document.createElement('article');
+      postDiv.className = 'post';
+      postDiv.setAttribute('tabindex', '0');
+      postDiv.setAttribute('aria-label', `Post by ${post.displayName}`);
+
+      // Post header: profile pic, user name, date, delete btn if owner
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'post-header';
+
+      const userImg = document.createElement('img');
+      userImg.className = 'post-profile-pic';
+      userImg.src = post.photoURL || 'https://via.placeholder.com/40?text=User';
+      userImg.alt = `${post.displayName}'s profile picture`;
+      headerDiv.appendChild(userImg);
+
+      const userNameSpan = document.createElement('span');
+      userNameSpan.className = 'post-user-name';
+      userNameSpan.textContent = post.displayName || "Unknown User";
+      headerDiv.appendChild(userNameSpan);
+
+      const dateSpan = document.createElement('time');
+      dateSpan.className = 'post-date';
+      if (post.createdAt && post.createdAt.toDate) {
+        const dateObj = post.createdAt.toDate();
+        dateSpan.textContent = dateObj.toLocaleString();
+        dateSpan.setAttribute('datetime', dateObj.toISOString());
+      } else {
+        dateSpan.textContent = "Unknown date";
+      }
+      headerDiv.appendChild(dateSpan);
+
+      // Delete button if post owner
+      if (post.uid === currentUser.uid) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'post-delete-btn';
+        delBtn.textContent = 'Delete';
+        delBtn.title = 'Delete post';
+        delBtn.setAttribute('aria-label', 'Delete your post');
+        delBtn.addEventListener('click', async () => {
+          if (confirm("Are you sure you want to delete this post?")) {
+            try {
+              await db.collection('posts').doc(postId).delete();
+            } catch (error) {
+              alert("Failed to delete post: " + error.message);
+            }
+          }
+        });
+        headerDiv.appendChild(delBtn);
+      }
+
+      postDiv.appendChild(headerDiv);
+
+      const textP = document.createElement('p');
+      textP.className = 'post-text';
+      textP.textContent = post.text || "";
+      postDiv.appendChild(textP);
+
+      return postDiv;
+    }
+
+    // Handle new post input to enable/disable button
+    newPostInput.addEventListener('input', () => {
+      postBtn.disabled = newPostInput.value.trim().length === 0;
+    });
+
+    // Submit new post
+    newPostForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = newPostInput.value.trim();
+      if (!text) return;
+
+      postBtn.disabled = true;
+
+      try {
+        await db.collection('posts').add({
+          uid: currentUser.uid,
+          displayName: profileNameElem.textContent,
+          photoURL: profilePicImg.src,
+          text: text,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        newPostInput.value = "";
+        postBtn.disabled = true;
+      } catch (error) {
+        alert("Failed to post: " + error.message);
+      } finally {
+        postBtn.disabled = false;
+      }
+    });
+
+    // Profile picture click to open settings panel and focus pic upload
+    profilePicImg.addEventListener('click', () => {
+      openSettingsPanel();
+      profilePicUpload.focus();
+    });
+
+    // Profile picture upload change handler
+    profilePicUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        // Basic validation for image type and size (max 2MB)
+        if (!file.type.startsWith('image/')) {
+          alert("Please select a valid image file.");
+          profilePicUpload.value = "";
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Image size must be under 2MB.");
+          profilePicUpload.value = "";
+          return;
+        }
+        profilePicFile = file;
+      }
+    });
+
+    // Save settings button
+    saveSettingsBtn.addEventListener('click', async () => {
+      saveSettingsBtn.disabled = true;
+      const newName = editNameInput.value.trim();
+      const newBio = editBioInput.value.trim();
+
+      try {
+        // Upload new profile pic if selected
+        let newPhotoURL = profilePicImg.src; // default current pic
+
+        if (profilePicFile) {
+          const storageRef = storage.ref();
+          const userPicRef = storageRef.child(`profile_pics/${currentUser.uid}_${Date.now()}`);
+          const uploadTask = await userPicRef.put(profilePicFile);
+          newPhotoURL = await uploadTask.ref.getDownloadURL();
+
+          // Update Firebase Auth user photoURL
+          await currentUser.updateProfile({ photoURL: newPhotoURL });
+        }
+
+        // Update Firebase Auth displayName
+        if (newName !== currentUser.displayName) {
+          await currentUser.updateProfile({ displayName: newName });
+        }
+
+        // Update Firestore user doc
+        await db.collection('users').doc(currentUser.uid).set({
+          displayName: newName,
+          bio: newBio,
+          photoURL: newPhotoURL
+        }, { merge: true });
+
+        // Update UI
+        profileNameElem.textContent = newName || "Unnamed User";
+        profileBioElem.textContent = newBio || "This is your bio. Edit it in settings.";
+        profilePicImg.src = newPhotoURL;
+
+        alert("Settings saved successfully!");
+        closeSettingsPanel();
+      } catch (error) {
+        alert("Failed to save settings: " + error.message);
+      } finally {
+        saveSettingsBtn.disabled = false;
+        profilePicFile = null;
+        profilePicUpload.value = "";
+      }
+    });
+
+    // Logout button
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        // Redirect handled by auth state change
+      } catch (error) {
+        alert("Logout failed: " + error.message);
+      }
+    });
+
+  </script>
 </body>
 </html>
