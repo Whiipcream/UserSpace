@@ -1,40 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>SocialWave Sign In</title>
+  <meta charset="UTF-8" />
+  <title>Login / Signup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+    }
+    .container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 30px;
+      background: #fff;
+      box-shadow: 0 0 10px #ccc;
+      border-radius: 8px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <h2>Sign Up / Log In</h2>
-
-  <input type="email" id="email" placeholder="Email"><br>
-  <input type="password" id="password" placeholder="Password"><br>
-  <button onclick="signUp()">Sign Up</button>
-  <button onclick="signIn()">Sign In</button>
-  <button onclick="signOut()">Sign Out</button>
-
-  <p id="status">Not signed in</p>
-
-  <hr>
-
-  <div id="profileForm" style="display:none;">
-    <h3>Create Your Profile</h3>
-    <input type="text" id="username" placeholder="Username"><br><br>
-    <textarea id="bio" placeholder="Your bio..."></textarea><br><br>
-    <input type="color" id="themeColor" value="#ff00ff">
-    <label for="themeColor"> Choose a profile color</label><br><br>
-    <button onclick="saveProfile()">Save Profile</button>
+  <div class="container">
+    <h2>Welcome to UserSpace</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="signupBtn">Sign Up</button>
+    <button id="loginBtn">Log In</button>
   </div>
 
   <script type="module">
-    // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
       getAuth,
       createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
+      signInWithEmailAndPassword
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
     import {
       getFirestore,
@@ -52,73 +65,38 @@
       appId: "1:201689446744:web:13e2062781c517189f4d2d"
     };
 
-    // Init Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Sign Up
-    window.signUp = async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert("Signed up successfully!");
-      } catch (error) {
-        alert("Error: " + error.message);
-      }
-    };
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const signupBtn = document.getElementById("signupBtn");
+    const loginBtn = document.getElementById("loginBtn");
 
-    // Sign In
-    window.signIn = async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    signupBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email
+        });
+        window.location.href = "profile.html";
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        alert("Signed in successfully!");
+        window.location.href = "profile.html";
       } catch (error) {
-        alert("Error: " + error.message);
-      }
-    };
-
-    // Sign Out
-    window.signOut = async () => {
-      await signOut(auth);
-      alert("Signed out!");
-    };
-
-    // Save Profile
-    window.saveProfile = async () => {
-      const user = auth.currentUser;
-      if (!user) return alert("Not logged in!");
-
-      const username = document.getElementById("username").value;
-      const bio = document.getElementById("bio").value;
-      const themeColor = document.getElementById("themeColor").value;
-
-      const userDoc = doc(db, "users", user.uid);
-      await setDoc(userDoc, {
-        uid: user.uid,
-        email: user.email,
-        username,
-        bio,
-        themeColor
-      });
-
-      alert("Profile saved!");
-    };
-
-    // Listen to auth state
-    onAuthStateChanged(auth, user => {
-      const status = document.getElementById("status");
-      const profileForm = document.getElementById("profileForm");
-
-      if (user) {
-        status.textContent = `Signed in as: ${user.email}`;
-        profileForm.style.display = "block";
-      } else {
-        status.textContent = "Not signed in";
-        profileForm.style.display = "none";
+        alert(error.message);
       }
     });
   </script>
