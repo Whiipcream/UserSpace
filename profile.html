@@ -1,121 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>User Profile - UserSpace</title>
+  <meta charset="UTF-8">
+  <title>User Profile</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-      background: #f9f9f9;
-      padding: 20px;
+      margin: 0;
+      background: #e9ebee;
+    }
+    .profile-container {
+      background: white;
+      max-width: 800px;
+      margin: auto;
       border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    h1 {
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    input[type="text"], textarea {
+    .cover {
       width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
+      height: 250px;
+      background: url('https://i.imgur.com/lhQGbHo.jpg') center/cover no-repeat;
+      position: relative;
     }
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-    #profile-pic {
-      display: block;
-      margin: 20px auto;
+    .profile-pic {
+      position: absolute;
+      bottom: -50px;
+      left: 30px;
+      width: 100px;
+      height: 100px;
+      border: 4px solid white;
       border-radius: 50%;
-      width: 150px;
-      height: 150px;
       object-fit: cover;
-      border: 3px solid #007bff;
     }
-    #upload-label {
-      display: block;
-      margin: 10px auto;
-      text-align: center;
-      cursor: pointer;
-      color: #007bff;
+    .info {
+      padding: 70px 30px 30px;
+      position: relative;
+    }
+    .name {
+      font-size: 26px;
       font-weight: bold;
     }
-    #upload-input {
-      display: none;
-    }
-    button {
-      margin-top: 30px;
-      width: 100%;
-      padding: 15px;
-      background-color: #007bff;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #logoutBtn {
-      background-color: #dc3545;
-      margin-top: 10px;
-    }
-    #logoutBtn:hover {
-      background-color: #a71d2a;
-    }
-    .email-display {
-      text-align: center;
+    .bio {
       margin-top: 10px;
       font-style: italic;
       color: #555;
     }
+    .settings {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .settings button {
+      padding: 8px 12px;
+      font-size: 14px;
+      background: #4267B2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .settings-panel {
+      display: none;
+      position: absolute;
+      top: 40px;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 4px;
+      z-index: 10;
+    }
+    .settings-panel input, .settings-panel textarea {
+      width: 100%;
+      margin: 6px 0;
+      padding: 6px;
+    }
+    .settings-panel button {
+      margin-top: 10px;
+      width: 100%;
+      background: #28a745;
+    }
+    .logout {
+      margin-top: 10px;
+      background: #dc3545 !important;
+    }
   </style>
 </head>
 <body>
-  <h1>Your Profile</h1>
-  <div class="email-display" id="userEmail">Loading email...</div>
-  
-  <img src="https://via.placeholder.com/150" alt="Profile Picture" id="profile-pic" />
-  <label id="upload-label" for="upload-input">Click to upload profile picture</label>
-  <input type="file" id="upload-input" accept="image/*" />
-
-  <label for="displayName">Display Name</label>
-  <input type="text" id="displayName" placeholder="Your display name" />
-
-  <label for="bio">Bio</label>
-  <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
-
-  <button id="saveBtn">Save Profile</button>
-  <button id="logoutBtn">Log Out</button>
+  <div class="profile-container">
+    <div class="cover">
+      <img id="profile-pic" class="profile-pic" src="https://via.placeholder.com/100" alt="Profile Picture">
+    </div>
+    <div class="info">
+      <div class="name" id="display-name">Loading...</div>
+      <div class="bio" id="bio-text">Loading bio...</div>
+      <div class="settings">
+        <button id="settingsToggle">⚙️ Settings</button>
+        <div class="settings-panel" id="settingsPanel">
+          <input type="text" id="editDisplayName" placeholder="Display Name">
+          <textarea id="editBio" placeholder="Bio..."></textarea>
+          <input type="file" id="uploadProfilePic" accept="image/*">
+          <button id="saveBtn">Save Profile</button>
+          <button class="logout" id="logoutBtn">Log Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
+      getAuth, onAuthStateChanged, signOut
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
     import {
-      getFirestore,
-      doc,
-      getDoc,
-      setDoc
+      getFirestore, doc, getDoc, setDoc
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
     import {
-      getStorage,
-      ref,
-      uploadBytes,
-      getDownloadURL
+      getStorage, ref, uploadBytes, getDownloadURL
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -132,77 +135,74 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    const userEmailElem = document.getElementById("userEmail");
-    const displayNameInput = document.getElementById("displayName");
-    const bioInput = document.getElementById("bio");
-    const profilePicImg = document.getElementById("profile-pic");
-    const uploadInput = document.getElementById("upload-input");
-    const saveBtn = document.getElementById("saveBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
     let currentUser = null;
     let profilePicFile = null;
+
+    const displayName = document.getElementById("display-name");
+    const bioText = document.getElementById("bio-text");
+    const profilePic = document.getElementById("profile-pic");
+    const editDisplayName = document.getElementById("editDisplayName");
+    const editBio = document.getElementById("editBio");
+    const uploadProfilePic = document.getElementById("uploadProfilePic");
+    const saveBtn = document.getElementById("saveBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const settingsToggle = document.getElementById("settingsToggle");
+    const settingsPanel = document.getElementById("settingsPanel");
+
+    settingsToggle.onclick = () => {
+      settingsPanel.style.display = settingsPanel.style.display === "block" ? "none" : "block";
+    };
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        userEmailElem.textContent = user.email;
-        await loadProfile();
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          displayName.textContent = data.displayName || user.email;
+          bioText.textContent = data.bio || "";
+          profilePic.src = data.profilePicUrl || profilePic.src;
+          editDisplayName.value = data.displayName || "";
+          editBio.value = data.bio || "";
+        } else {
+          displayName.textContent = user.email;
+        }
       } else {
         window.location.href = "index.html";
       }
     });
 
-    async function loadProfile() {
-      try {
-        const docRef = doc(db, "users", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          displayNameInput.value = data.displayName || "";
-          bioInput.value = data.bio || "";
-          if (data.profilePicUrl) {
-            profilePicImg.src = data.profilePicUrl;
-          }
-        }
-      } catch (error) {
-        alert("Failed to load profile: " + error.message);
-      }
-    }
-
-    uploadInput.addEventListener("change", (e) => {
+    uploadProfilePic.addEventListener("change", (e) => {
       if (e.target.files.length > 0) {
         profilePicFile = e.target.files[0];
         const reader = new FileReader();
         reader.onload = (event) => {
-          profilePicImg.src = event.target.result;
+          profilePic.src = event.target.result;
         };
         reader.readAsDataURL(profilePicFile);
       }
     });
 
     saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
       saveBtn.textContent = "Saving...";
+      saveBtn.disabled = true;
       try {
-        let profilePicUrl = null;
-
+        let profilePicUrl = profilePic.src;
         if (profilePicFile) {
           const storageRef = ref(storage, `profilePics/${currentUser.uid}`);
           const snapshot = await uploadBytes(storageRef, profilePicFile);
           profilePicUrl = await getDownloadURL(snapshot.ref);
         }
-
-        const userDoc = doc(db, "users", currentUser.uid);
-        await setDoc(userDoc, {
-          displayName: displayNameInput.value,
-          bio: bioInput.value,
-          profilePicUrl: profilePicUrl || profilePicImg.src
+        await setDoc(doc(db, "users", currentUser.uid), {
+          displayName: editDisplayName.value,
+          bio: editBio.value,
+          profilePicUrl
         });
-
-        alert("Profile saved!");
+        displayName.textContent = editDisplayName.value;
+        bioText.textContent = editBio.value;
+        alert("Profile updated!");
       } catch (err) {
-        alert("Error saving profile: " + err.message);
+        alert("Error: " + err.message);
       }
       saveBtn.disabled = false;
       saveBtn.textContent = "Save Profile";
