@@ -2,140 +2,155 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MySpaceFace Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile | SocialWave</title>
   <link rel="manifest" href="manifest.json" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
       background: #f0f2f5;
     }
+
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px;
-      background: #1877f2;
+      background-color: #4267B2;
       color: white;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .profile-header {
+      padding: 15px;
       text-align: center;
+    }
+
+    .profile-container {
       padding: 20px;
-      background: white;
     }
+
     .profile-pic {
-      width: 120px;
-      height: 120px;
+      width: 100px;
+      height: 100px;
+      background: gray;
       border-radius: 50%;
-      background: #ccc;
-      margin: 0 auto 10px;
-      border: 4px solid #1877f2;
+      margin: auto;
     }
-    .profile-header h2 {
-      margin: 10px 0 5px;
+
+    .post-box {
+      margin-top: 20px;
     }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      resize: none;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4267B2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .posts {
+      margin-top: 20px;
+    }
+
+    .post {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
     .nav-bar {
       position: fixed;
       bottom: 0;
       width: 100%;
-      background: white;
       display: flex;
       justify-content: space-around;
+      background: white;
+      border-top: 1px solid #ccc;
       padding: 12px 0;
-      border-top: 1px solid #ddd;
-      z-index: 10;
+      font-size: 1.2em;
     }
+
     .nav-bar button {
       background: none;
+      color: #4267B2;
       border: none;
-      font-size: 24px;
-      flex: 1;
+      cursor: pointer;
     }
-    #settings-menu {
-      display: none;
+
+    /* Settings panel */
+    .settings-panel {
+      position: fixed;
+      bottom: -300px;
+      left: 0;
+      width: 100%;
       background: white;
-      position: absolute;
-      top: 60px;
-      right: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 10px;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.2);
+      transition: bottom 0.3s ease;
+      padding: 20px;
     }
-    #settings-menu button {
-      width: 100%;
-      margin-bottom: 5px;
-    }
-    .post-section {
-      padding: 15px;
-    }
-    .post-section textarea {
-      width: 100%;
-      height: 80px;
-      padding: 10px;
-      font-size: 16px;
-      resize: none;
-      margin-bottom: 10px;
-    }
-    .post-section button {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      background: #1877f2;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    .post {
-      background: white;
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+    .settings-panel.open {
+      bottom: 60px;
     }
   </style>
 </head>
 <body>
-
   <header>
-    <div>MySpaceFace</div>
-    <button id="settingsBtn">⚙️</button>
+    <h2>My Profile</h2>
   </header>
 
-  <div class="profile-header">
-    <div class="profile-pic" id="user-pic"></div>
-    <h2 id="username">Welcome!</h2>
+  <div class="profile-container">
+    <div class="profile-pic"></div>
+
+    <div class="post-box">
+      <textarea id="postContent" placeholder="What's on your mind?" rows="4"></textarea>
+      <button onclick="createPost()">Post</button>
+    </div>
+
+    <div class="posts" id="postsContainer">
+      <!-- User posts will appear here -->
+    </div>
   </div>
 
-  <div id="settings-menu">
-    <button id="editProfileBtn">Edit Profile</button>
-    <button id="logoutBtn">Log Out</button>
+  <!-- Settings Panel -->
+  <div class="settings-panel" id="settingsPanel">
+    <h3>Settings</h3>
+    <button onclick="logout()">Log Out</button>
+    <p>More settings coming soon...</p>
   </div>
 
-  <div class="post-section">
-    <textarea id="postInput" placeholder="What's on your mind?"></textarea>
-    <button id="postBtn">Post</button>
-    <div id="postList"></div>
-  </div>
-
+  <!-- Bottom Nav -->
   <div class="nav-bar">
-    <button title="Home">🏠</button>
-    <button title="Search">🔍</button>
-    <button title="Post">➕</button>
-    <button title="Profile">👤</button>
+    <button onclick="toggleSettings()">⚙️</button>
+    <button onclick="alert('Feed coming soon!')">🏠</button>
+    <button onclick="alert('Friends coming soon!')">👥</button>
   </div>
 
+  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      query,
+      orderBy,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
@@ -147,61 +162,62 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const auth = getAuth();
+    const db = getFirestore();
 
-    const postBtn = document.getElementById("postBtn");
-    const postInput = document.getElementById("postInput");
-    const postList = document.getElementById("postList");
-    const settingsBtn = document.getElementById("settingsBtn");
-    const settingsMenu = document.getElementById("settings-menu");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const usernameEl = document.getElementById("username");
-
-    settingsBtn.onclick = () => {
-      settingsMenu.style.display = settingsMenu.style.display === "block" ? "none" : "block";
-    };
-
-    logoutBtn.onclick = () => {
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
-    };
+    let currentUser;
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        usernameEl.textContent = "Welcome!";
+        currentUser = user;
         loadPosts();
       } else {
         window.location.href = "index.html";
       }
     });
 
+    async function createPost() {
+      const content = document.getElementById('postContent').value.trim();
+      if (!content) return;
+
+      await addDoc(collection(db, "posts"), {
+        uid: currentUser.uid,
+        content: content,
+        createdAt: new Date()
+      });
+
+      document.getElementById('postContent').value = "";
+      loadPosts();
+    }
+
     async function loadPosts() {
+      const postsContainer = document.getElementById('postsContainer');
+      postsContainer.innerHTML = "";
+
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
-      postList.innerHTML = "";
+
       querySnapshot.forEach((doc) => {
-        const post = doc.data();
-        const div = document.createElement("div");
-        div.className = "post";
-        div.textContent = post.text;
-        postList.appendChild(div);
+        const data = doc.data();
+        if (data.uid === currentUser.uid) {
+          const div = document.createElement("div");
+          div.className = "post";
+          div.textContent = data.content;
+          postsContainer.appendChild(div);
+        }
       });
     }
 
-    postBtn.onclick = async () => {
-      const text = postInput.value.trim();
-      if (text) {
-        await addDoc(collection(db, "posts"), {
-          text,
-          createdAt: serverTimestamp()
-        });
-        postInput.value = "";
-        loadPosts();
-      }
-    };
-  </script>
+    function toggleSettings() {
+      const panel = document.getElementById("settingsPanel");
+      panel.classList.toggle("open");
+    }
 
+    function logout() {
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      });
+    }
+  </script>
 </body>
 </html>
