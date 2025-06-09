@@ -1,33 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Themes - UserSpace</title>
+  <title>Themes</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <nav class="bottom-nav">
-    <button id="btn-profile" class="nav-btn">Profile</button>
-    <button id="btn-wall" class="nav-btn">Wall</button>
-    <button id="btn-friends" class="nav-btn">Friends</button>
-    <button id="btn-themes" class="nav-btn active">Themes</button>
-    <button id="btn-logout" class="nav-btn">Logout</button>
+  <header><h1>Customize Theme</h1></header>
+  <input type="color" id="bgColorPicker" />
+  <button onclick="saveTheme()">Save Theme</button>
+  <nav>
+    <button onclick="location.href='profile.html'">Profile</button>
+    <button onclick="location.href='wall.html'">Wall</button>
+    <button onclick="location.href='friends.html'">Friends</button>
+    <button onclick="location.href='themes.html'">Themes</button>
   </nav>
-
-  <main>
-    <h1>Customize Your Profile Theme</h1>
-    <label>
-      Background Color:
-      <input type="color" id="input-bg-color" />
-    </label>
-    <label>
-      Text Color:
-      <input type="color" id="input-text-color" />
-    </label>
-    <button id="btn-save-theme">Save Theme</button>
-  </main>
-
   <script type="module" src="themes.js"></script>
 </body>
 </html>
