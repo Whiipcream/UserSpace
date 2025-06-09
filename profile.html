@@ -2,32 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Profile</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profile - UserSpace</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="profile-container">
-    <div id="navbar">
-      <button onclick="goTo('wall')">Wall</button>
-      <button onclick="goTo('friends')">Friends</button>
-      <button onclick="goTo('themes')">Themes</button>
-      <button onclick="logout()">Logout</button>
-    </div>
+  <nav class="bottom-nav">
+    <button id="btn-profile" class="nav-btn active">Profile</button>
+    <button id="btn-wall" class="nav-btn">Wall</button>
+    <button id="btn-friends" class="nav-btn">Friends</button>
+    <button id="btn-themes" class="nav-btn">Themes</button>
+    <button id="btn-logout" class="nav-btn">Logout</button>
+  </nav>
 
-    <div id="profile-header">
-      <img id="profile-pic" src="default.png" alt="Profile Picture" />
-      <input type="file" id="upload-pic" />
-      <h2 id="username"></h2>
-    </div>
+  <main id="profile-main">
+    <section class="profile-header">
+      <div class="profile-pic-container">
+        <img id="profile-pic" src="default-profile.png" alt="Profile Picture" />
+        <input type="file" id="upload-profile-pic" style="display:none" accept="image/*" />
+        <button id="btn-upload-pic">Change Picture</button>
+      </div>
+      <h1 id="display-name">User Name</h1>
+      <button id="btn-edit-profile">Edit Profile</button>
+    </section>
 
-    <div id="post-box">
-      <textarea id="new-post" placeholder="What's on your mind?"></textarea>
-      <button onclick="createPost()">Post</button>
-    </div>
+    <section id="profile-posts-section">
+      <h2>Your Posts</h2>
+      <textarea id="new-post-text" placeholder="What's on your mind?"></textarea>
+      <button id="btn-post">Post</button>
+      <div id="posts-container"></div>
+    </section>
 
-    <div id="posts-feed"></div>
-  </div>
+    <section id="profile-settings" class="hidden">
+      <h2>Profile Settings</h2>
+      <label>
+        Display Name:
+        <input type="text" id="input-display-name" />
+      </label>
+      <button id="btn-save-settings">Save Settings</button>
+      <button id="btn-cancel-settings">Cancel</button>
+    </section>
+  </main>
 
   <script type="module" src="app.js"></script>
 </body>
