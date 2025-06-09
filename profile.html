@@ -1,61 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>User Profile</title>
+  <meta charset="UTF-8" />
+  <title>User Profile - UserSpace</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      transition: background-color 0.3s;
-    }
-    .profile-box {
-      max-width: 500px;
-      margin: 60px auto;
+      max-width: 600px;
+      margin: 40px auto;
+      background: #f9f9f9;
       padding: 20px;
-      background: white;
       border-radius: 8px;
-      box-shadow: 0 0 10px #ccc;
     }
-    input, textarea {
+    h1 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    input[type="text"], textarea {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
+      margin-top: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
     }
-    #saveBtn {
-      margin-top: 10px;
-      background: green;
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    #profile-pic {
+      display: block;
+      margin: 20px auto;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border: 3px solid #007bff;
+    }
+    #upload-label {
+      display: block;
+      margin: 10px auto;
+      text-align: center;
+      cursor: pointer;
+      color: #007bff;
+      font-weight: bold;
+    }
+    #upload-input {
+      display: none;
+    }
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 15px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 6px;
       color: white;
-      border: none;
-      padding: 10px;
+      font-size: 1.2rem;
       cursor: pointer;
     }
-    #editBtn, #signOutBtn {
-      margin-top: 15px;
-      padding: 10px;
-      border: none;
-      cursor: pointer;
-      width: 49%;
+    button:hover {
+      background-color: #0056b3;
     }
-    #editBtn { background: #007bff; color: white; }
-    #signOutBtn { background: #dc3545; color: white; }
+    #logoutBtn {
+      background-color: #dc3545;
+      margin-top: 10px;
+    }
+    #logoutBtn:hover {
+      background-color: #a71d2a;
+    }
+    .email-display {
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+      color: #555;
+    }
   </style>
 </head>
 <body>
-  <div class="profile-box">
-    <h1 id="usernameDisplay">Your Profile</h1>
-    <p><strong>Email:</strong> <span id="emailDisplay"></span></p>
-    <p><strong>Bio:</strong> <span id="bioDisplay"></span></p>
+  <h1>Your Profile</h1>
+  <div class="email-display" id="userEmail">Loading email...</div>
+  
+  <img src="https://via.placeholder.com/150" alt="Profile Picture" id="profile-pic" />
+  <label id="upload-label" for="upload-input">Click to upload profile picture</label>
+  <input type="file" id="upload-input" accept="image/*" />
 
-    <div id="editSection" style="display:none;">
-      <input type="text" id="usernameInput" placeholder="Username">
-      <textarea id="bioInput" placeholder="Bio"></textarea>
-      <input type="color" id="themeColorInput">
-      <button id="saveBtn">Save Changes</button>
-    </div>
+  <label for="displayName">Display Name</label>
+  <input type="text" id="displayName" placeholder="Your display name" />
 
-    <button id="editBtn">Edit Profile</button>
-    <button id="signOutBtn">Sign Out</button>
-  </div>
+  <label for="bio">Bio</label>
+  <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
+
+  <button id="saveBtn">Save Profile</button>
+  <button id="logoutBtn">Log Out</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
@@ -70,6 +111,12 @@
       getDoc,
       setDoc
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
@@ -83,65 +130,91 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const emailDisplay = document.getElementById("emailDisplay");
-    const bioDisplay = document.getElementById("bioDisplay");
-
-    const usernameInput = document.getElementById("usernameInput");
-    const bioInput = document.getElementById("bioInput");
-    const themeColorInput = document.getElementById("themeColorInput");
-
-    const editSection = document.getElementById("editSection");
-    const editBtn = document.getElementById("editBtn");
+    const userEmailElem = document.getElementById("userEmail");
+    const displayNameInput = document.getElementById("displayName");
+    const bioInput = document.getElementById("bio");
+    const profilePicImg = document.getElementById("profile-pic");
+    const uploadInput = document.getElementById("upload-input");
     const saveBtn = document.getElementById("saveBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
+    let currentUser = null;
+    let profilePicFile = null;
+
+    // Monitor auth state
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        userEmailElem.textContent = user.email;
+        await loadProfile();
+      } else {
+        // Not logged in, redirect to login page
         window.location.href = "index.html";
-        return;
-      }
-
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        usernameDisplay.textContent = data.username || "No username yet";
-        emailDisplay.textContent = data.email;
-        bioDisplay.textContent = data.bio || "No bio yet.";
-        document.body.style.backgroundColor = data.themeColor || "#ffffff";
-
-        // Pre-fill edit inputs
-        usernameInput.value = data.username || "";
-        bioInput.value = data.bio || "";
-        themeColorInput.value = data.themeColor || "#ffffff";
       }
     });
 
-    editBtn.addEventListener("click", () => {
-      editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+    // Load profile data from Firestore & Storage
+    async function loadProfile() {
+      try {
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          displayNameInput.value = data.displayName || "";
+          bioInput.value = data.bio || "";
+          if (data.profilePicUrl) {
+            profilePicImg.src = data.profilePicUrl;
+          }
+        }
+      } catch (error) {
+        alert("Failed to load profile: " + error.message);
+      }
+    }
+
+    // Upload new profile picture if selected
+    uploadInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) {
+        profilePicFile = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          profilePicImg.src = event.target.result;
+        };
+        reader.readAsDataURL(profilePicFile);
+      }
     });
 
     saveBtn.addEventListener("click", async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+      try {
+        let profilePicUrl = null;
 
-      const updatedData = {
-        username: usernameInput.value,
-        bio: bioInput.value,
-        themeColor: themeColorInput.value
-      };
+        if (profilePicFile) {
+          // Upload profile picture to Firebase Storage
+          const storageRef = ref(storage, `profile_pictures/${currentUser.uid}`);
+          await uploadBytes(storageRef, profilePicFile);
+          profilePicUrl = await getDownloadURL(storageRef);
+        }
 
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        ...updatedData
-      });
+        // Save profile data to Firestore
+        await setDoc(doc(db, "users", currentUser.uid), {
+          email: currentUser.email,
+          displayName: displayNameInput.value.trim(),
+          bio: bioInput.value.trim(),
+          profilePicUrl: profilePicUrl || profilePicImg.src
+        }, { merge: true });
 
-      alert("Profile updated!");
-      window.location.reload();
+        alert("Profile saved successfully!");
+      } catch (error) {
+        alert("Error saving profile: " + error.message);
+      }
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save Profile";
     });
 
-    document.getElementById("signOutBtn").addEventListener("click", async () => {
+    logoutBtn.addEventListener("click", async () => {
       await signOut(auth);
       window.location.href = "index.html";
     });
