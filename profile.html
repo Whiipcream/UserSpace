@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Your Profile</title>
+  <title>User Profile</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,30 +16,44 @@
       border-radius: 8px;
       box-shadow: 0 0 10px #ccc;
     }
-    h1 {
-      text-align: center;
-    }
-    .bio {
-      margin-top: 10px;
+    input, textarea {
+      width: 100%;
       padding: 10px;
-      background: #f4f4f4;
-      border-radius: 5px;
+      margin-top: 10px;
     }
-    #signOutBtn {
-      margin-top: 20px;
-      background: red;
+    #saveBtn {
+      margin-top: 10px;
+      background: green;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 10px;
       cursor: pointer;
     }
+    #editBtn, #signOutBtn {
+      margin-top: 15px;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      width: 49%;
+    }
+    #editBtn { background: #007bff; color: white; }
+    #signOutBtn { background: #dc3545; color: white; }
   </style>
 </head>
 <body>
-  <div class="profile-box" id="profileBox">
-    <h1 id="username">Loading...</h1>
-    <p><strong>Email:</strong> <span id="email"></span></p>
-    <div class="bio" id="bio"></div>
+  <div class="profile-box">
+    <h1 id="usernameDisplay">Your Profile</h1>
+    <p><strong>Email:</strong> <span id="emailDisplay"></span></p>
+    <p><strong>Bio:</strong> <span id="bioDisplay"></span></p>
+
+    <div id="editSection" style="display:none;">
+      <input type="text" id="usernameInput" placeholder="Username">
+      <textarea id="bioInput" placeholder="Bio"></textarea>
+      <input type="color" id="themeColorInput">
+      <button id="saveBtn">Save Changes</button>
+    </div>
+
+    <button id="editBtn">Edit Profile</button>
     <button id="signOutBtn">Sign Out</button>
   </div>
 
@@ -53,7 +67,8 @@
     import {
       getFirestore,
       doc,
-      getDoc
+      getDoc,
+      setDoc
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -69,28 +84,61 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const usernameEl = document.getElementById("username");
-    const emailEl = document.getElementById("email");
-    const bioEl = document.getElementById("bio");
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const emailDisplay = document.getElementById("emailDisplay");
+    const bioDisplay = document.getElementById("bioDisplay");
+
+    const usernameInput = document.getElementById("usernameInput");
+    const bioInput = document.getElementById("bioInput");
+    const themeColorInput = document.getElementById("themeColorInput");
+
+    const editSection = document.getElementById("editSection");
+    const editBtn = document.getElementById("editBtn");
+    const saveBtn = document.getElementById("saveBtn");
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        window.location.href = "index.html"; // redirect if not signed in
+        window.location.href = "index.html";
         return;
       }
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        usernameEl.textContent = data.username || "No Username";
-        emailEl.textContent = data.email;
-        bioEl.textContent = data.bio || "No bio yet.";
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        usernameDisplay.textContent = data.username || "No username yet";
+        emailDisplay.textContent = data.email;
+        bioDisplay.textContent = data.bio || "No bio yet.";
         document.body.style.backgroundColor = data.themeColor || "#ffffff";
-      } else {
-        usernameEl.textContent = "Profile not found";
-        emailEl.textContent = "";
-        bioEl.textContent = "";
+
+        // Pre-fill edit inputs
+        usernameInput.value = data.username || "";
+        bioInput.value = data.bio || "";
+        themeColorInput.value = data.themeColor || "#ffffff";
       }
+    });
+
+    editBtn.addEventListener("click", () => {
+      editSection.style.display = editSection.style.display === "none" ? "block" : "none";
+    });
+
+    saveBtn.addEventListener("click", async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const updatedData = {
+        username: usernameInput.value,
+        bio: bioInput.value,
+        themeColor: themeColorInput.value
+      };
+
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        ...updatedData
+      });
+
+      alert("Profile updated!");
+      window.location.reload();
     });
 
     document.getElementById("signOutBtn").addEventListener("click", async () => {
