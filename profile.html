@@ -1,49 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Profile • SocialWave</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <header>SocialWave</header>
-  <main>
-    <section id="profile-header">
-      <img id="profile-pic" alt="Profile picture"/>
-      <div>
-        <h1 id="profile-name"></h1>
-        <p id="profile-bio"></p>
-      </div>
-    </section>
+  <div id="profile-container">
+    <div id="navbar">
+      <button onclick="goTo('wall')">Wall</button>
+      <button onclick="goTo('friends')">Friends</button>
+      <button onclick="goTo('themes')">Themes</button>
+      <button onclick="logout()">Logout</button>
+    </div>
 
-    <form id="new-post-form">
-      <input id="new-post-input" placeholder="What’s on your mind?" />
-      <button id="post-btn" type="submit">Post</button>
-    </form>
+    <div id="profile-header">
+      <img id="profile-pic" src="default.png" alt="Profile Picture" />
+      <input type="file" id="upload-pic" />
+      <h2 id="username"></h2>
+    </div>
 
-    <section id="posts-list"></section>
-  </main>
+    <div id="post-box">
+      <textarea id="new-post" placeholder="What's on your mind?"></textarea>
+      <button onclick="createPost()">Post</button>
+    </div>
 
-  <nav id="bottom-nav">
-    <button id="nav-profile" class="active">Profile</button>
-    <button id="nav-home">Home</button>
-    <button id="nav-settings">Settings</button>
-  </nav>
+    <div id="posts-feed"></div>
+  </div>
 
-  <section id="settings-panel">
-    <h2>Profile Settings</h2>
-    <label>Name</label>
-    <input id="edit-name" length="50"/>
-    <label>Bio</label>
-    <textarea id="edit-bio" rows="2"></textarea>
-    <label>Profile Pic</label>
-    <input id="profile-pic-upload" type="file"/>
-    <button id="save-settings-btn">Save Settings</button>
-    <button id="logout-btn">Log Out</button>
-  </section>
-
-  <script type="module" src="firebase.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
