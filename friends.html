@@ -1,25 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Friends - UserSpace</title>
+  <title>Friends</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <nav class="bottom-nav">
-    <button id="btn-profile" class="nav-btn">Profile</button>
-    <button id="btn-wall" class="nav-btn">Wall</button>
-    <button id="btn-friends" class="nav-btn active">Friends</button>
-    <button id="btn-themes" class="nav-btn">Themes</button>
-    <button id="btn-logout" class="nav-btn">Logout</button>
+  <header><h1>Friends</h1></header>
+  <div id="friendsList">Loading...</div>
+  <nav>
+    <button onclick="location.href='profile.html'">Profile</button>
+    <button onclick="location.href='wall.html'">Wall</button>
+    <button onclick="location.href='friends.html'">Friends</button>
+    <button onclick="location.href='themes.html'">Themes</button>
   </nav>
-
-  <main>
-    <h1>Friends List</h1>
-    <div id="friends-list-container"></div>
-  </main>
-
   <script type="module" src="friends.js"></script>
 </body>
 </html>
