@@ -2,222 +2,189 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Profile | SocialWave</title>
-  <link rel="manifest" href="manifest.json" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SocialWave Profile</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-    }
-
-    header {
-      background-color: #4267B2;
-      color: white;
-      padding: 15px;
-      text-align: center;
-    }
-
-    .profile-container {
-      padding: 20px;
-    }
-
-    .profile-pic {
-      width: 100px;
-      height: 100px;
-      background: gray;
-      border-radius: 50%;
-      margin: auto;
-    }
-
-    .post-box {
-      margin-top: 20px;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 10px;
-      resize: none;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      padding: 10px 20px;
-      background-color: #4267B2;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .posts {
-      margin-top: 20px;
-    }
-
-    .post {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .nav-bar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: white;
-      border-top: 1px solid #ccc;
-      padding: 12px 0;
-      font-size: 1.2em;
-    }
-
-    .nav-bar button {
-      background: none;
-      color: #4267B2;
-      border: none;
-      cursor: pointer;
-    }
-
-    /* Settings panel */
-    .settings-panel {
-      position: fixed;
-      bottom: -300px;
-      left: 0;
-      width: 100%;
-      background: white;
-      border-top-left-radius: 15px;
-      border-top-right-radius: 15px;
-      box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.2);
-      transition: bottom 0.3s ease;
-      padding: 20px;
-    }
-
-    .settings-panel.open {
-      bottom: 60px;
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+    #nav { position: fixed; bottom: 0; left: 0; right: 0; background: #222; color: white; display: flex; justify-content: space-around; padding: 10px 0; }
+    #nav button { color: white; background: none; border: none; font-size: 18px; }
+    #profile { max-width: 600px; margin: 0 auto 60px; }
+    #postContent { width: 100%; height: 60px; margin-bottom: 10px; }
+    #postsContainer .post { background: #eee; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+    #settingsMenu { 
+      position: fixed; bottom: 60px; 
+      right: 20px; background: white; border: 1px solid #ccc; 
+      padding: 10px; display: none; width: 250px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
-  <header>
-    <h2>My Profile</h2>
-  </header>
 
-  <div class="profile-container">
-    <div class="profile-pic"></div>
+<div id="profile">
+  <h2 id="username">Welcome!</h2>
+  <!-- Profile picture placeholder -->
+  <div><img id="profilePic" src="https://via.placeholder.com/100" alt="Profile Picture" style="border-radius:50%;"></div>
 
-    <div class="post-box">
-      <textarea id="postContent" placeholder="What's on your mind?" rows="4"></textarea>
-      <button onclick="createPost()">Post</button>
-    </div>
+  <textarea id="postContent" placeholder="What's on your mind?"></textarea><br/>
+  <button id="postBtn">Post</button>
 
-    <div class="posts" id="postsContainer">
-      <!-- User posts will appear here -->
-    </div>
-  </div>
+  <h3>Your Posts</h3>
+  <div id="postsContainer"><p>Loading posts...</p></div>
+</div>
 
-  <!-- Settings Panel -->
-  <div class="settings-panel" id="settingsPanel">
-    <h3>Settings</h3>
-    <button onclick="logout()">Log Out</button>
-    <p>More settings coming soon...</p>
-  </div>
+<div id="settingsMenu">
+  <h4>Settings</h4>
+  <button id="logoutBtn">Log Out</button>
+  <!-- Add more settings here -->
+</div>
 
-  <!-- Bottom Nav -->
-  <div class="nav-bar">
-    <button onclick="toggleSettings()">⚙️</button>
-    <button onclick="alert('Feed coming soon!')">🏠</button>
-    <button onclick="alert('Friends coming soon!')">👥</button>
-  </div>
+<div id="nav">
+  <button id="navProfileBtn">Profile</button>
+  <button id="navPostsBtn">Posts</button>
+  <button id="navFriendsBtn">Friends (Coming Soon)</button>
+  <button id="navSettingsBtn">Settings</button>
+</div>
 
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      query,
-      orderBy,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    getDocs,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
-      authDomain: "userspace-c42b3.firebaseapp.com",
-      projectId: "userspace-c42b3",
-      storageBucket: "userspace-c42b3.appspot.com",
-      messagingSenderId: "201689446744",
-      appId: "1:201689446744:web:13e2062781c517189f4d2d"
-    };
+  // Your Firebase config (replace with your own)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
+    authDomain: "userspace-c42b3.firebaseapp.com",
+    projectId: "userspace-c42b3",
+    storageBucket: "userspace-c42b3.firebasestorage.app",
+    messagingSenderId: "201689446744",
+    appId: "1:201689446744:web:13e2062781c517189f4d2d"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getFirestore();
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    let currentUser;
+  let currentUser = null;
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        loadPosts();
-      } else {
-        window.location.href = "index.html";
-      }
-    });
+  // UI Elements
+  const usernameEl = document.getElementById("username");
+  const profilePicEl = document.getElementById("profilePic");
+  const postContentEl = document.getElementById("postContent");
+  const postsContainer = document.getElementById("postsContainer");
+  const settingsMenu = document.getElementById("settingsMenu");
 
-    async function createPost() {
-      const content = document.getElementById('postContent').value.trim();
-      if (!content) return;
+  // Buttons
+  const postBtn = document.getElementById("postBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const navSettingsBtn = document.getElementById("navSettingsBtn");
 
+  // Listen for auth state changes (user logged in or out)
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      // Set profile info (hide email)
+      usernameEl.textContent = `Welcome, ${user.displayName || "User"}!`;
+      if(user.photoURL) profilePicEl.src = user.photoURL;
+
+      loadPosts();
+    } else {
+      currentUser = null;
+      usernameEl.textContent = "Please log in.";
+      postsContainer.innerHTML = "";
+    }
+  });
+
+  // Create a post
+  async function createPost() {
+    const content = postContentEl.value.trim();
+    if (!content) {
+      alert("Please write something to post!");
+      return;
+    }
+    if (!currentUser) {
+      alert("You must be logged in to post!");
+      return;
+    }
+    try {
       await addDoc(collection(db, "posts"), {
         uid: currentUser.uid,
         content: content,
-        createdAt: new Date()
+        createdAt: serverTimestamp()
       });
-
-      document.getElementById('postContent').value = "";
+      postContentEl.value = "";
+      alert("Post created!");
       loadPosts();
+    } catch (error) {
+      console.error("Error adding post:", error);
+      alert("Failed to create post: " + error.message);
     }
+  }
 
-    async function loadPosts() {
-      const postsContainer = document.getElementById('postsContainer');
+  // Load posts and display
+  async function loadPosts() {
+    postsContainer.innerHTML = "Loading posts...";
+    try {
+      const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(postsQuery);
+
       postsContainer.innerHTML = "";
+      if (querySnapshot.empty) {
+        postsContainer.innerHTML = "<p>No posts yet.</p>";
+        return;
+      }
 
-      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(doc => {
+        const post = doc.data();
+        const postDiv = document.createElement("div");
+        postDiv.classList.add("post");
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.uid === currentUser.uid) {
-          const div = document.createElement("div");
-          div.className = "post";
-          div.textContent = data.content;
-          postsContainer.appendChild(div);
-        }
+        const postDate = post.createdAt && post.createdAt.toDate
+          ? post.createdAt.toDate().toLocaleString()
+          : "Just now";
+
+        postDiv.innerHTML = `
+          <p>${post.content}</p>
+          <small>Posted on ${postDate}</small>
+        `;
+        postsContainer.appendChild(postDiv);
       });
+    } catch (error) {
+      console.error("Error loading posts:", error);
+      postsContainer.innerHTML = "<p>Failed to load posts.</p>";
     }
+  }
 
-    function toggleSettings() {
-      const panel = document.getElementById("settingsPanel");
-      panel.classList.toggle("open");
-    }
+  // Button listeners
+  postBtn.addEventListener("click", createPost);
 
-    function logout() {
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth).catch(error => alert("Error signing out: " + error.message));
+  });
+
+  navSettingsBtn.addEventListener("click", () => {
+    // Toggle settings menu (goes up from bottom)
+    if (settingsMenu.style.display === "block") {
+      settingsMenu.style.display = "none";
+    } else {
+      settingsMenu.style.display = "block";
     }
-  </script>
+  });
+
+  // Hide settings if click outside
+  window.addEventListener("click", e => {
+    if (!settingsMenu.contains(e.target) && e.target !== navSettingsBtn) {
+      settingsMenu.style.display = "none";
+    }
+  });
+
+</script>
 </body>
 </html>
