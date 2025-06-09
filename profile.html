@@ -122,7 +122,7 @@
       apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
       authDomain: "userspace-c42b3.firebaseapp.com",
       projectId: "userspace-c42b3",
-      storageBucket: "userspace-c42b3.firebasestorage.app",
+      storageBucket: "userspace-c42b3.appspot.com",
       messagingSenderId: "201689446744",
       appId: "1:201689446744:web:13e2062781c517189f4d2d"
     };
@@ -143,19 +143,16 @@
     let currentUser = null;
     let profilePicFile = null;
 
-    // Monitor auth state
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         userEmailElem.textContent = user.email;
         await loadProfile();
       } else {
-        // Not logged in, redirect to login page
         window.location.href = "index.html";
       }
     });
 
-    // Load profile data from Firestore & Storage
     async function loadProfile() {
       try {
         const docRef = doc(db, "users", currentUser.uid);
@@ -173,7 +170,6 @@
       }
     }
 
-    // Upload new profile picture if selected
     uploadInput.addEventListener("change", (e) => {
       if (e.target.files.length > 0) {
         profilePicFile = e.target.files[0];
@@ -192,23 +188,21 @@
         let profilePicUrl = null;
 
         if (profilePicFile) {
-          // Upload profile picture to Firebase Storage
-          const storageRef = ref(storage, `profile_pictures/${currentUser.uid}`);
-          await uploadBytes(storageRef, profilePicFile);
-          profilePicUrl = await getDownloadURL(storageRef);
+          const storageRef = ref(storage, `profilePics/${currentUser.uid}`);
+          const snapshot = await uploadBytes(storageRef, profilePicFile);
+          profilePicUrl = await getDownloadURL(snapshot.ref);
         }
 
-        // Save profile data to Firestore
-        await setDoc(doc(db, "users", currentUser.uid), {
-          email: currentUser.email,
-          displayName: displayNameInput.value.trim(),
-          bio: bioInput.value.trim(),
+        const userDoc = doc(db, "users", currentUser.uid);
+        await setDoc(userDoc, {
+          displayName: displayNameInput.value,
+          bio: bioInput.value,
           profilePicUrl: profilePicUrl || profilePicImg.src
-        }, { merge: true });
+        });
 
-        alert("Profile saved successfully!");
-      } catch (error) {
-        alert("Error saving profile: " + error.message);
+        alert("Profile saved!");
+      } catch (err) {
+        alert("Error saving profile: " + err.message);
       }
       saveBtn.disabled = false;
       saveBtn.textContent = "Save Profile";
