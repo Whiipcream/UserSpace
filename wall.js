@@ -1,41 +1,20 @@
 import {
-  db, auth, collection, query, onSnapshot, orderBy, signOut, onAuthStateChanged
-} from "./firebase.js";
+  db, collection, getDocs, query, orderBy
+} from './firebase.js';
 
-const wallPostsContainer = document.getElementById("wall-posts-container");
-const navProfile = document.getElementById("btn-profile");
-const navWall = document.getElementById("btn-wall");
-const navFriends = document.getElementById("btn-friends");
-const navThemes = document.getElementById("btn-themes");
-const btnLogout = document.getElementById("btn-logout");
+const wallFeed = document.getElementById("wallFeed");
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    setupWallListener();
-  }
-});
-
-function setupWallListener() {
-  const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-  onSnapshot(postsQuery, (snapshot) => {
-    wallPostsContainer.innerHTML = "";
-    snapshot.forEach((docSnap) => {
-      const post = docSnap.data();
-      const postEl = document.createElement("div");
-      postEl.className = "post";
-      postEl.textContent = `${post.content} — posted by ${post.uid}`;
-      wallPostsContainer.appendChild(postEl);
-    });
+async function loadWall() {
+  const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+  const snap = await getDocs(q);
+  wallFeed.innerHTML = "";
+  snap.forEach(doc => {
+    const post = doc.data();
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `<strong>${post.username}</strong><p>${post.content}</p>`;
+    wallFeed.appendChild(div);
   });
 }
 
-navProfile.addEventListener("click", () => window.location.href = "profile.html");
-navWall.addEventListener("click", () => window.location.href = "wall.html");
-navFriends.addEventListener("click", () => window.location.href = "friends.html");
-navThemes.addEventListener("click", () => window.location.href = "themes.html");
-btnLogout.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-});
+loadWall();
