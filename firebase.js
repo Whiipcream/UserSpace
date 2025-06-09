@@ -1,64 +1,22 @@
 // firebase.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  addDoc,
-  deleteDoc,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD-Uo84sAcOeKyXDilFZxW4W-AhvZ6JWus",
-  authDomain: "socialwave-app.firebaseapp.com",
-  projectId: "socialwave-app",
-  storageBucket: "socialwave-app.appspot.com",
-  messagingSenderId: "384197971951",
-  appId: "1:384197971951:web:fe663c8eb4d62e60b8cb92",
-  measurementId: "G-8V2PBZJGSP"
+  apiKey: "AIzaSyBU...bK_o",
+  authDomain: "socialwave-3ce03.firebaseapp.com",
+  projectId: "socialwave-3ce03",
+  storageBucket: "socialwave-3ce03.appspot.com",
+  messagingSenderId: "472193765580",
+  appId: "1:472193765580:web:e902ec06f1a9789d73b94e"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
-const storage = getStorage();
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-export {
-  auth,
-  db,
-  storage,
-  storageRef,
-  uploadBytes,
-  getDownloadURL,
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  addDoc,
-  deleteDoc,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  orderBy,
-  onAuthStateChanged,
-  signOut
-};
+export { auth, db, storage };
