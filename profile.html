@@ -1,69 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SocialWave Profile</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-    #nav { position: fixed; bottom: 0; left: 0; right: 0; background: #222; color: white; display: flex; justify-content: space-around; padding: 10px 0; }
-    #nav button { color: white; background: none; border: none; font-size: 18px; }
-    #profile { max-width: 600px; margin: 0 auto 60px; }
-    #postContent { width: 100%; height: 60px; margin-bottom: 10px; }
-    #postsContainer .post { background: #eee; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-    #settingsMenu { 
-      position: fixed; bottom: 60px; 
-      right: 20px; background: white; border: 1px solid #ccc; 
-      padding: 10px; display: none; width: 250px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Profile - SocialWave</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 0;
+    background: #f9f9f9;
+  }
+  #profileContainer {
+    padding: 20px;
+    margin-bottom: 60px; /* space for nav */
+  }
+  #profilePic {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc;
+  }
+  #uploadPicInput {
+    margin-top: 10px;
+  }
+  #postInput {
+    width: 100%;
+    margin-top: 20px;
+    resize: vertical;
+  }
+  #postBtn {
+    margin-top: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  #postsList {
+    margin-top: 30px;
+  }
+  .postItem {
+    background: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  #navBar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #222;
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    color: white;
+  }
+  #navBar button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  #navBar button:hover {
+    text-decoration: underline;
+  }
+  #settingsPanel {
+    position: fixed;
+    bottom: 60px; /* above nav */
+    left: 0; right: 0;
+    max-height: 300px;
+    background: white;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.25);
+    padding: 20px;
+    overflow-y: auto;
+    display: none;
+    z-index: 100;
+  }
+  #settingsPanel.active {
+    display: block;
+  }
+</style>
 </head>
 <body>
 
-<div id="profile">
-  <h2 id="username">Welcome!</h2>
-  <!-- Profile picture placeholder -->
-  <div><img id="profilePic" src="https://via.placeholder.com/100" alt="Profile Picture" style="border-radius:50%;"></div>
+<div id="profileContainer">
+  <h2>Your Profile</h2>
+  <img id="profilePic" src="https://via.placeholder.com/100" alt="Profile Picture" />
+  <br />
+  <input type="file" id="uploadPicInput" accept="image/*" />
+  <button id="uploadPicBtn">Upload Profile Picture</button>
 
-  <textarea id="postContent" placeholder="What's on your mind?"></textarea><br/>
+  <h3>Create Post</h3>
+  <textarea id="postInput" rows="3" placeholder="What's on your mind?"></textarea>
+  <br />
   <button id="postBtn">Post</button>
 
-  <h3>Your Posts</h3>
-  <div id="postsContainer"><p>Loading posts...</p></div>
+  <div id="postsList"></div>
 </div>
 
-<div id="settingsMenu">
-  <h4>Settings</h4>
-  <button id="logoutBtn">Log Out</button>
-  <!-- Add more settings here -->
+<div id="settingsPanel">
+  <h3>Settings</h3>
+  <button id="logoutBtn">Logout</button>
+  <!-- Add more settings controls here -->
 </div>
 
-<div id="nav">
-  <button id="navProfileBtn">Profile</button>
-  <button id="navPostsBtn">Posts</button>
-  <button id="navFriendsBtn">Friends (Coming Soon)</button>
-  <button id="navSettingsBtn">Settings</button>
+<div id="navBar">
+  <button id="btnProfile">Profile</button>
+  <button id="btnHome">Home</button>
+  <button id="btnSettings">Settings</button>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    query,
-    orderBy,
-    getDocs,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
 
-  // Your Firebase config (replace with your own)
   const firebaseConfig = {
     apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
     authDomain: "userspace-c42b3.firebaseapp.com",
     projectId: "userspace-c42b3",
-    storageBucket: "userspace-c42b3.firebasestorage.app",
+    storageBucket: "userspace-c42b3.appspot.com",
     messagingSenderId: "201689446744",
     appId: "1:201689446744:web:13e2062781c517189f4d2d"
   };
@@ -71,120 +126,131 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const storage = getStorage(app);
 
-  let currentUser = null;
+  const profilePic = document.getElementById('profilePic');
+  const uploadPicInput = document.getElementById('uploadPicInput');
+  const uploadPicBtn = document.getElementById('uploadPicBtn');
+  const postInput = document.getElementById('postInput');
+  const postBtn = document.getElementById('postBtn');
+  const postsList = document.getElementById('postsList');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const settingsPanel = document.getElementById('settingsPanel');
 
-  // UI Elements
-  const usernameEl = document.getElementById("username");
-  const profilePicEl = document.getElementById("profilePic");
-  const postContentEl = document.getElementById("postContent");
-  const postsContainer = document.getElementById("postsContainer");
-  const settingsMenu = document.getElementById("settingsMenu");
+  const btnProfile = document.getElementById('btnProfile');
+  const btnHome = document.getElementById('btnHome');
+  const btnSettings = document.getElementById('btnSettings');
+  const profileContainer = document.getElementById('profileContainer');
 
-  // Buttons
-  const postBtn = document.getElementById("postBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const navSettingsBtn = document.getElementById("navSettingsBtn");
+  // Toggle settings panel
+  btnSettings.onclick = () => {
+    if (settingsPanel.classList.contains('active')) {
+      settingsPanel.classList.remove('active');
+    } else {
+      settingsPanel.classList.add('active');
+    }
+  };
 
-  // Listen for auth state changes (user logged in or out)
+  // Simple nav (only Profile and Home placeholders for now)
+  btnProfile.onclick = () => {
+    settingsPanel.classList.remove('active');
+    profileContainer.style.display = 'block';
+    // You can add your home page logic here, for now hide it
+    // homePage.style.display = 'none'; // If you add a home page container
+  };
+  btnHome.onclick = () => {
+    alert('Home feed coming soon!');
+  };
+
+  // Logout
+  logoutBtn.onclick = async () => {
+    await signOut(auth);
+    alert('Logged out');
+    location.reload();
+  };
+
+  // Upload profile picture handler
+  uploadPicBtn.onclick = async () => {
+    const file = uploadPicInput.files[0];
+    if (!file) {
+      alert('Please select an image file first.');
+      return;
+    }
+    const user = auth.currentUser;
+    if (!user) {
+      alert('User not logged in');
+      return;
+    }
+    try {
+      const storageRef = ref(storage, `profile_pictures/${user.uid}/${file.name}`);
+      await uploadBytes(storageRef, file);
+      const photoURL = await getDownloadURL(storageRef);
+      await updateProfile(user, { photoURL });
+      profilePic.src = photoURL;
+      alert('Profile picture updated!');
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Failed to upload profile picture');
+    }
+  };
+
+  // Post button handler
+  postBtn.onclick = async () => {
+    const content = postInput.value.trim();
+    if (!content) {
+      alert('Post content cannot be empty');
+      return;
+    }
+    const user = auth.currentUser;
+    if (!user) {
+      alert('User not logged in');
+      return;
+    }
+    try {
+      await addDoc(collection(db, 'posts'), {
+        uid: user.uid,
+        content,
+        createdAt: serverTimestamp(),
+        displayName: user.displayName || 'Anonymous',
+        photoURL: user.photoURL || ''
+      });
+      postInput.value = '';
+      loadPosts();
+    } catch (err) {
+      console.error('Error posting:', err);
+      alert('Failed to create post');
+    }
+  };
+
+  // Load user posts
+  async function loadPosts() {
+    const user = auth.currentUser;
+    if (!user) return;
+    const postsQuery = query(collection(db, 'posts'),
+      where('uid', '==', user.uid),
+      orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(postsQuery);
+    postsList.innerHTML = '';
+    snapshot.forEach(doc => {
+      const post = doc.data();
+      const postDiv = document.createElement('div');
+      postDiv.classList.add('postItem');
+      postDiv.textContent = post.content;
+      postsList.appendChild(postDiv);
+    });
+  }
+
+  // Monitor auth state & initialize profile info
   onAuthStateChanged(auth, user => {
     if (user) {
-      currentUser = user;
-      // Set profile info (hide email)
-      usernameEl.textContent = `Welcome, ${user.displayName || "User"}!`;
-      if(user.photoURL) profilePicEl.src = user.photoURL;
-
+      profilePic.src = user.photoURL || 'https://via.placeholder.com/100';
       loadPosts();
     } else {
-      currentUser = null;
-      usernameEl.textContent = "Please log in.";
-      postsContainer.innerHTML = "";
+      alert('Not logged in. Please sign in first.');
+      // Redirect or show login page here if you want
     }
   });
-
-  // Create a post
-  async function createPost() {
-    const content = postContentEl.value.trim();
-    if (!content) {
-      alert("Please write something to post!");
-      return;
-    }
-    if (!currentUser) {
-      alert("You must be logged in to post!");
-      return;
-    }
-    try {
-      await addDoc(collection(db, "posts"), {
-        uid: currentUser.uid,
-        content: content,
-        createdAt: serverTimestamp()
-      });
-      postContentEl.value = "";
-      alert("Post created!");
-      loadPosts();
-    } catch (error) {
-      console.error("Error adding post:", error);
-      alert("Failed to create post: " + error.message);
-    }
-  }
-
-  // Load posts and display
-  async function loadPosts() {
-    postsContainer.innerHTML = "Loading posts...";
-    try {
-      const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(postsQuery);
-
-      postsContainer.innerHTML = "";
-      if (querySnapshot.empty) {
-        postsContainer.innerHTML = "<p>No posts yet.</p>";
-        return;
-      }
-
-      querySnapshot.forEach(doc => {
-        const post = doc.data();
-        const postDiv = document.createElement("div");
-        postDiv.classList.add("post");
-
-        const postDate = post.createdAt && post.createdAt.toDate
-          ? post.createdAt.toDate().toLocaleString()
-          : "Just now";
-
-        postDiv.innerHTML = `
-          <p>${post.content}</p>
-          <small>Posted on ${postDate}</small>
-        `;
-        postsContainer.appendChild(postDiv);
-      });
-    } catch (error) {
-      console.error("Error loading posts:", error);
-      postsContainer.innerHTML = "<p>Failed to load posts.</p>";
-    }
-  }
-
-  // Button listeners
-  postBtn.addEventListener("click", createPost);
-
-  logoutBtn.addEventListener("click", () => {
-    signOut(auth).catch(error => alert("Error signing out: " + error.message));
-  });
-
-  navSettingsBtn.addEventListener("click", () => {
-    // Toggle settings menu (goes up from bottom)
-    if (settingsMenu.style.display === "block") {
-      settingsMenu.style.display = "none";
-    } else {
-      settingsMenu.style.display = "block";
-    }
-  });
-
-  // Hide settings if click outside
-  window.addEventListener("click", e => {
-    if (!settingsMenu.contains(e.target) && e.target !== navSettingsBtn) {
-      settingsMenu.style.display = "none";
-    }
-  });
-
 </script>
+
 </body>
 </html>
