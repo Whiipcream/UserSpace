@@ -1,48 +1,45 @@
+<!-- profile.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profile - UserSpace</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Profile</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <nav class="bottom-nav">
-    <button id="btn-profile" class="nav-btn active">Profile</button>
-    <button id="btn-wall" class="nav-btn">Wall</button>
-    <button id="btn-friends" class="nav-btn">Friends</button>
-    <button id="btn-themes" class="nav-btn">Themes</button>
-    <button id="btn-logout" class="nav-btn">Logout</button>
+  <header>
+    <h1>SocialWave</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
+
+  <section class="profile-header">
+    <input type="file" id="profilePicInput" hidden>
+    <img id="profilePic" src="default-avatar.png" alt="Profile Picture"/>
+    <button onclick="document.getElementById('profilePicInput').click()">Upload Pic</button>
+    <h2 id="username">Loading...</h2>
+  </section>
+
+  <div class="post-form">
+    <textarea id="postContent" placeholder="What's on your mind?"></textarea>
+    <button id="postBtn">Post</button>
+  </div>
+
+  <div id="postFeed"></div>
+
+  <nav>
+    <button onclick="location.href='profile.html'">Profile</button>
+    <button onclick="location.href='wall.html'">Wall</button>
+    <button onclick="location.href='friends.html'">Friends</button>
+    <button onclick="location.href='themes.html'">Themes</button>
+    <button onclick="toggleSettings()">⚙️</button>
   </nav>
 
-  <main id="profile-main">
-    <section class="profile-header">
-      <div class="profile-pic-container">
-        <img id="profile-pic" src="default-profile.png" alt="Profile Picture" />
-        <input type="file" id="upload-profile-pic" style="display:none" accept="image/*" />
-        <button id="btn-upload-pic">Change Picture</button>
-      </div>
-      <h1 id="display-name">User Name</h1>
-      <button id="btn-edit-profile">Edit Profile</button>
-    </section>
-
-    <section id="profile-posts-section">
-      <h2>Your Posts</h2>
-      <textarea id="new-post-text" placeholder="What's on your mind?"></textarea>
-      <button id="btn-post">Post</button>
-      <div id="posts-container"></div>
-    </section>
-
-    <section id="profile-settings" class="hidden">
-      <h2>Profile Settings</h2>
-      <label>
-        Display Name:
-        <input type="text" id="input-display-name" />
-      </label>
-      <button id="btn-save-settings">Save Settings</button>
-      <button id="btn-cancel-settings">Cancel</button>
-    </section>
-  </main>
+  <div id="settingsPanel" class="hidden">
+    <h3>Edit Profile</h3>
+    <input type="text" id="editUsername" placeholder="New username" />
+    <button id="saveProfileBtn">Save</button>
+  </div>
 
   <script type="module" src="app.js"></script>
 </body>
