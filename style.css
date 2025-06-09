@@ -1,102 +1,72 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: sans-serif;
   margin: 0;
   padding: 0;
-  background-color: var(--bg-color, #fff);
-  color: var(--text-color, #000);
+  background: #f0f2f5;
 }
 
-.hidden {
-  display: none;
-}
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+header {
   background: #4267B2;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-}
-
-.nav-btn {
-  background: none;
-  border: none;
   color: white;
-  font-weight: bold;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-
-.nav-btn.active {
-  border-bottom: 2px solid white;
+  padding: 10px;
+  text-align: center;
 }
 
 .profile-header {
   text-align: center;
-  margin-top: 80px;
-  padding: 20px;
+  padding: 10px;
 }
 
-.profile-pic-container {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
-}
-
-.profile-pic-container img {
-  width: 150px;
-  height: 150px;
+#profilePic {
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #4267B2;
+}
+
+.post-form {
+  padding: 10px;
+  text-align: center;
+}
+
+.post-form textarea {
+  width: 90%;
+  height: 80px;
+}
+
+nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #ccc;
+}
+
+nav button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  font-size: 16px;
 }
 
 .post {
+  background: white;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+#settingsPanel {
+  position: fixed;
+  bottom: 60px;
+  right: 10px;
+  background: white;
+  padding: 10px;
   border: 1px solid #ccc;
-  margin: 10px auto;
-  padding: 10px;
-  max-width: 600px;
-  background: #f0f2f5;
-  border-radius: 8px;
 }
 
-.friend-entry {
-  padding: 8px;
-  border-bottom: 1px solid #ccc;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-#profile-posts-section {
-  max-width: 600px;
-  margin: 20px auto;
-}
-
-textarea#new-post-text {
-  width: 100%;
-  height: 70px;
-  margin-bottom: 10px;
-  padding: 10px;
-  font-size: 1rem;
-  resize: vertical;
-}
-
-#profile-settings {
-  max-width: 600px;
-  margin: 20px auto;
-  border: 1px solid #4267B2;
-  padding: 15px;
-  border-radius: 8px;
-  background: #e7f0ff;
-}
-
-input[type="text"], input[type="color"] {
-  width: 100%;
-  padding: 8px;
-  margin-top: 6px;
-  box-sizing: border-box;
-  font-size: 1rem;
+.hidden {
+  display: none;
 }
