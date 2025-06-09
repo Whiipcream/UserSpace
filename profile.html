@@ -1,125 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>User Profile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Profile</title>
+  <meta name="theme-color" content="#4267B2" />
   <style>
-    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background: #e9ebee;
-    }
-    .profile-container {
-      background: white;
-      max-width: 800px;
-      margin: auto;
-      border-radius: 8px;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
       overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      background: #f0f2f5;
     }
-    .cover {
-      width: 100%;
-      height: 250px;
-      background: url('https://i.imgur.com/lhQGbHo.jpg') center/cover no-repeat;
-      position: relative;
-    }
-    .profile-pic {
-      position: absolute;
-      bottom: -50px;
-      left: 30px;
-      width: 100px;
-      height: 100px;
-      border: 4px solid white;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .info {
-      padding: 70px 30px 30px;
-      position: relative;
-    }
-    .name {
-      font-size: 26px;
-      font-weight: bold;
-    }
-    .bio {
-      margin-top: 10px;
-      font-style: italic;
-      color: #555;
-    }
-    .settings {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-    .settings button {
-      padding: 8px 12px;
-      font-size: 14px;
-      background: #4267B2;
+
+    header {
+      background-color: #4267B2;
       color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+      position: relative;
     }
-    .settings-panel {
-      display: none;
+
+    .settings-menu {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+    }
+
+    .dropdown {
+      background: white;
+      border: 1px solid #ccc;
       position: absolute;
       top: 40px;
       right: 0;
-      background: white;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 4px;
+      width: 180px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       z-index: 10;
     }
-    .settings-panel input, .settings-panel textarea {
+
+    .dropdown button {
+      padding: 10px;
+      background: white;
+      border: none;
+      text-align: left;
       width: 100%;
-      margin: 6px 0;
-      padding: 6px;
+      cursor: pointer;
     }
-    .settings-panel button {
-      margin-top: 10px;
+
+    .dropdown button:hover {
+      background: #f0f0f0;
+    }
+
+    .profile-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .profile-box {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 10px auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .post-box textarea {
       width: 100%;
-      background: #28a745;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      resize: none;
     }
-    .logout {
+
+    .post-box button {
       margin-top: 10px;
-      background: #dc3545 !important;
+      background-color: #4267B2;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .post {
+      background: #fff;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .post time {
+      font-size: 12px;
+      color: gray;
+    }
+
+    nav {
+      background-color: #fff;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: #4267B2;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="profile-container">
-    <div class="cover">
-      <img id="profile-pic" class="profile-pic" src="https://via.placeholder.com/100" alt="Profile Picture">
-    </div>
-    <div class="info">
-      <div class="name" id="display-name">Loading...</div>
-      <div class="bio" id="bio-text">Loading bio...</div>
-      <div class="settings">
-        <button id="settingsToggle">⚙️ Settings</button>
-        <div class="settings-panel" id="settingsPanel">
-          <input type="text" id="editDisplayName" placeholder="Display Name">
-          <textarea id="editBio" placeholder="Bio..."></textarea>
-          <input type="file" id="uploadProfilePic" accept="image/*">
-          <button id="saveBtn">Save Profile</button>
-          <button class="logout" id="logoutBtn">Log Out</button>
-        </div>
+  <header>
+    Your Profile
+    <div class="settings-menu">
+      <button onclick="toggleDropdown()">☰</button>
+      <div class="dropdown" id="settingsDropdown">
+        <button onclick="editProfile()">Edit Profile</button>
+        <button onclick="logout()">Logout</button>
       </div>
     </div>
+  </header>
+
+  <div class="profile-container">
+    <div class="profile-box">
+      <h2 id="userEmail">Welcome</h2>
+    </div>
+
+    <div class="profile-box post-box">
+      <textarea id="postText" rows="4" placeholder="What's on your mind?"></textarea>
+      <button onclick="createPost()">Post</button>
+    </div>
+
+    <div id="postFeed" class="profile-box">
+      <h3>Your Posts</h3>
+      <div id="postsContainer"></div>
+    </div>
   </div>
+
+  <nav>
+    <button onclick="goHome()">Home</button>
+    <button onclick="goProfile()">Profile</button>
+    <button onclick="toggleDropdown()">Settings</button>
+  </nav>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import {
-      getAuth, onAuthStateChanged, signOut
+      getAuth,
+      signOut,
+      onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
     import {
-      getFirestore, doc, getDoc, setDoc
+      getFirestore,
+      collection,
+      addDoc,
+      query,
+      orderBy,
+      where,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-    import {
-      getStorage, ref, uploadBytes, getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIZKKu6y00Q5QpaEzaIddoPD844QnUPBk",
@@ -133,84 +185,78 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
+
+    const dropdown = document.getElementById("settingsDropdown");
+    const userEmail = document.getElementById("userEmail");
+    const postText = document.getElementById("postText");
+    const postsContainer = document.getElementById("postsContainer");
 
     let currentUser = null;
-    let profilePicFile = null;
 
-    const displayName = document.getElementById("display-name");
-    const bioText = document.getElementById("bio-text");
-    const profilePic = document.getElementById("profile-pic");
-    const editDisplayName = document.getElementById("editDisplayName");
-    const editBio = document.getElementById("editBio");
-    const uploadProfilePic = document.getElementById("uploadProfilePic");
-    const saveBtn = document.getElementById("saveBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const settingsToggle = document.getElementById("settingsToggle");
-    const settingsPanel = document.getElementById("settingsPanel");
+    function toggleDropdown() {
+      dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+    }
 
-    settingsToggle.onclick = () => {
-      settingsPanel.style.display = settingsPanel.style.display === "block" ? "none" : "block";
-    };
+    function editProfile() {
+      alert("Edit profile coming soon!");
+    }
 
-    onAuthStateChanged(auth, async (user) => {
+    function logout() {
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      });
+    }
+
+    function goHome() {
+      alert("Home/feed coming soon!");
+    }
+
+    function goProfile() {
+      location.href = "profile.html";
+    }
+
+    function createPost() {
+      const content = postText.value.trim();
+      if (!content) return;
+
+      addDoc(collection(db, "posts"), {
+        uid: currentUser.uid,
+        content,
+        createdAt: new Date().toISOString()
+      }).then(() => {
+        postText.value = "";
+        loadPosts();
+      });
+    }
+
+    async function loadPosts() {
+      postsContainer.innerHTML = "";
+      const q = query(
+        collection(db, "posts"),
+        where("uid", "==", currentUser.uid),
+        orderBy("createdAt", "desc")
+      );
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `
+          <p>${data.content}</p>
+          <time>${new Date(data.createdAt).toLocaleString()}</time>
+        `;
+        postsContainer.appendChild(div);
+      });
+    }
+
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
-        const docSnap = await getDoc(doc(db, "users", user.uid));
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          displayName.textContent = data.displayName || user.email;
-          bioText.textContent = data.bio || "";
-          profilePic.src = data.profilePicUrl || profilePic.src;
-          editDisplayName.value = data.displayName || "";
-          editBio.value = data.bio || "";
-        } else {
-          displayName.textContent = user.email;
-        }
+        userEmail.textContent = `Welcome, ${user.email}`;
+        loadPosts();
       } else {
         window.location.href = "index.html";
       }
-    });
-
-    uploadProfilePic.addEventListener("change", (e) => {
-      if (e.target.files.length > 0) {
-        profilePicFile = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          profilePic.src = event.target.result;
-        };
-        reader.readAsDataURL(profilePicFile);
-      }
-    });
-
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.textContent = "Saving...";
-      saveBtn.disabled = true;
-      try {
-        let profilePicUrl = profilePic.src;
-        if (profilePicFile) {
-          const storageRef = ref(storage, `profilePics/${currentUser.uid}`);
-          const snapshot = await uploadBytes(storageRef, profilePicFile);
-          profilePicUrl = await getDownloadURL(snapshot.ref);
-        }
-        await setDoc(doc(db, "users", currentUser.uid), {
-          displayName: editDisplayName.value,
-          bio: editBio.value,
-          profilePicUrl
-        });
-        displayName.textContent = editDisplayName.value;
-        bioText.textContent = editBio.value;
-        alert("Profile updated!");
-      } catch (err) {
-        alert("Error: " + err.message);
-      }
-      saveBtn.disabled = false;
-      saveBtn.textContent = "Save Profile";
-    });
-
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "index.html";
     });
   </script>
 </body>
